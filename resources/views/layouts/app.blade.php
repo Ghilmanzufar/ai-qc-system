@@ -17,15 +17,18 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans h-screen w-screen overflow-hidden flex selection:bg-indigo-100 selection:text-indigo-900">
 
-    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity duration-300 opacity-0" onclick="toggleSidebar()"></div>
+    <!-- Overlay Gelap (Sekarang aktif di semua ukuran layar) -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden transition-opacity duration-300 opacity-0" onclick="toggleSidebar()"></div>
 
+    <!-- Panggil Komponen Sidebar -->
     @include('components.sidebar')
 
-    <div class="flex-1 flex flex-col h-screen relative bg-slate-50 transition-all duration-300 lg:ml-[280px] w-full overflow-hidden">
+    <!-- HAPUS lg:ml-[280px] dan ganti dengan ml-0 agar layar Fullscreen penuh -->
+    <div id="mainContent" class="flex-1 flex flex-col h-screen relative bg-slate-50 transition-all duration-300 w-full overflow-hidden ml-0">
         
         @include('components.topbar')
 
-        <main class="flex-1 flex flex-col p-4 sm:p-6 gap-6 overflow-y-auto pb-[160px]">
+        <main class="flex-1 flex flex-col p-4 sm:p-6 gap-6 overflow-y-auto">
             @yield('content')
         </main>
 
@@ -33,24 +36,24 @@
 
     @stack('scripts')
 
+    <!-- Script Hamburger Menu yang sudah diperbaiki -->
     <script>
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
-        let isSidebarOpen = false;
 
         function toggleSidebar() {
-            isSidebarOpen = !isSidebarOpen;
+            // Geser sidebar masuk/keluar layar
+            sidebar.classList.toggle('-translate-x-full');
             
-            if (isSidebarOpen) {
-                // Buka Sidebar
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-            } else {
-                // Tutup Sidebar
-                sidebar.classList.add('-translate-x-full');
+            // Atur efek gelap overlay
+            if (sidebar.classList.contains('-translate-x-full')) {
+                // Jika sidebar tertutup, hilangkan overlay
                 overlay.classList.add('opacity-0');
                 setTimeout(() => overlay.classList.add('hidden'), 300);
+            } else {
+                // Jika sidebar terbuka, munculkan overlay
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
             }
         }
     </script>

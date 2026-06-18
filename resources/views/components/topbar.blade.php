@@ -1,7 +1,8 @@
 <header class="bg-white/80 backdrop-blur-md h-20 flex justify-between items-center w-full px-4 sm:px-8 z-30 shrink-0 border-b border-slate-200 sticky top-0">
     
     <div class="flex items-center gap-4">
-        <button onclick="toggleSidebar()" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 transition-colors active:scale-95">
+        <!-- HAPUS lg:hidden DI SINI -->
+        <button onclick="toggleSidebar()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 transition-colors active:scale-95">
             <span class="material-symbols-outlined">menu</span>
         </button>
         

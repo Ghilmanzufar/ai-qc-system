@@ -1,11 +1,13 @@
-<nav id="sidebar" class="bg-white w-[280px] h-full fixed left-0 top-0 flex flex-col border-r border-slate-200 z-50 transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 shadow-2xl lg:shadow-none">
+<!-- HAPUS lg:translate-x-0 dan lg:shadow-none DI SINI -->
+<nav id="sidebar" class="bg-white w-[280px] h-full fixed left-0 top-0 flex flex-col border-r border-slate-200 z-50 transition-transform duration-300 ease-in-out -translate-x-full shadow-2xl">
     
     <div class="h-20 flex items-center justify-between px-6 border-b border-slate-100 shrink-0">
         <div>
             <h1 class="text-xl font-black text-slate-800 tracking-tight">PlantFloor<span class="text-indigo-600">.</span></h1>
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Area Bekasi</p>
         </div>
-        <button onclick="toggleSidebar()" class="lg:hidden w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 hover:bg-slate-200 transition-colors">
+        <!-- HAPUS lg:hidden DI SINI -->
+        <button onclick="toggleSidebar()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 hover:bg-slate-200 transition-colors">
             <span class="material-symbols-outlined text-[20px]">close</span>
         </button>
     </div>
