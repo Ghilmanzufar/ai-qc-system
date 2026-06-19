@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ProductModel;
 use App\Models\Part;
-use Illuminate\Support\Facades\Storage; // Tambahkan ini
-use Illuminate\Support\Str;             // Tambahkan ini
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http; // Wajib ditambahkan untuk memanggil API Python
 
 class MemberController extends Controller
 {
@@ -23,63 +24,53 @@ class MemberController extends Controller
         return response()->json($parts);
     }
 
-    // Fungsi Menerima Gambar & Simulasi AI
+    // Fungsi untuk Menerima Gambar & Mengirim ke Python AI
     public function analyze(Request $request) {
-        // 1. Validasi paket yang dikirim Javascript
+        // Validasi paket dari Javascript
         $request->validate([
             'image' => 'required|string',
             'model' => 'required|string',
             'part' => 'required|string',
         ]);
 
-        // Nanti di sinilah kita simpan gambar ke Storage dan mengirimkannya ke Python (YOLOv8)
-        // ...
-
-        // 2. Simulasi Proses AI (Jeda 1.5 detik agar seolah-olah AI sedang berpikir)
-        usleep(1500000); 
-
-        // 3. Simulasi Hasil (80% kemungkinan PASS, 20% kemungkinan NG)
-        $hasilAI = rand(1, 100) <= 80 ? 'PASS' : 'NG';
-
-        // 4. Balas pesan ke Javascript
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Gambar berhasil dianalisis',
-            'result' => $hasilAI,
-            'part_inspected' => $request->part
-        ]);
-    }
-
-
-    public function analyze(Request $request) {
-        $request->validate([
-            'image' => 'required|string',
-            'model' => 'required|string',
-            'part' => 'required|string',
-        ]);
-
-        // 1. Proses Konversi Base64 ke File Gambar
+        // 1. Simpan Gambar ke Storage Laravel
         $imageData = $request->input('image');
         $image = str_replace('data:image/jpeg;base64,', '', $imageData);
         $image = base64_decode($image);
 
-        // 2. Buat nama file unik: "part-name_timestamp_random.jpg"
         $fileName = Str::slug($request->part) . '_' . time() . '_' . Str::random(5) . '.jpg';
         $filePath = 'inspections/' . $fileName;
 
-        // 3. Simpan ke storage/app/public/inspections/
         Storage::disk('public')->put($filePath, $image);
 
-        // 4. Simulasi proses AI (Simulasi AI sedang bekerja)
-        usleep(1500000); 
-        $hasilAI = rand(1, 100) <= 80 ? 'PASS' : 'NG';
+        // 2. Ambil rute asli (Absolute Path) dari gambar di laptopmu
+        $absolutePath = storage_path('app/public/' . $filePath);
 
-        // 5. Kirim respon
+        // 3. Tembak gambar tersebut ke Server AI (Python di port 5000)
+        try {
+            $response = Http::timeout(15)->attach(
+                'image', file_get_contents($absolutePath), $fileName
+            )->post('http://127.0.0.1:5000/predict');
+
+            // 4. Tangkap balasan dari Python
+            if ($response->successful()) {
+                $hasilAI = $response->json()['result']; // 'PASS' atau 'NG'
+                $pesanAI = $response->json()['details']; // Pesan detail dari Python
+            } else {
+                $hasilAI = 'ERROR';
+                $pesanAI = 'Gagal memproses di server AI (Kode: ' . $response->status() . ').';
+            }
+        } catch (\Exception $e) {
+            $hasilAI = 'ERROR';
+            $pesanAI = 'Server AI mati atau tidak bisa dihubungi. Pastikan python ai_server.py menyala.';
+        }
+
+        // 5. Kirim hasilnya ke Javascript / Layar Member
         return response()->json([
             'status' => 'success',
-            'message' => 'Gambar berhasil disimpan dan dianalisis',
+            'message' => $pesanAI,
             'result' => $hasilAI,
-            'file_url' => Storage::url($filePath) // URL untuk menampilkan gambar nanti
+            'file_url' => Storage::url($filePath)
         ]);
     }
 }
