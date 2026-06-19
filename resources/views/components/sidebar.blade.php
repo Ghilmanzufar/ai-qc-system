@@ -3,8 +3,8 @@
     
     <div class="h-20 flex items-center justify-between px-6 border-b border-slate-100 shrink-0">
         <div>
-            <h1 class="text-xl font-black text-slate-800 tracking-tight">PlantFloor<span class="text-indigo-600">.</span></h1>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Area Bekasi</p>
+            <h1 class="text-xl font-black text-slate-800 tracking-tight">Packing<span class="text-indigo-600">.</span></h1>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Factory 1</p>
         </div>
         <!-- HAPUS lg:hidden DI SINI -->
         <button onclick="toggleSidebar()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 hover:bg-slate-200 transition-colors">
@@ -40,7 +40,7 @@
             </div>
             <div class="flex flex-col">
                 <span class="text-sm font-bold text-slate-800">Ghilman Z.</span>
-                <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Operator</span>
+                <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Member</span>
             </div>
         </div>
     </div>

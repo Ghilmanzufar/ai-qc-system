@@ -1,13 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\OperatorController; 
+use App\Http\Controllers\MemberController; // Sudah diganti
 
-// Halaman Utama sekarang dilayani oleh OperatorController
-Route::get('/', [OperatorController::class, 'index']);
+// Halaman Utama pakai MemberController
+Route::get('/', [MemberController::class, 'index']);
 
-// Jalur API untuk diambil oleh Javascript secara diam-diam (Fetch)
-Route::get('/api/parts/{modelId}', [OperatorController::class, 'getParts']);
+// Endpoint API untuk Fetch JS
+Route::get('/api/parts/{modelId}', [MemberController::class, 'getParts']);
+
+// Endpoint API untuk Menerima Foto dan Menganalisis AI
+Route::post('/api/analyze', [MemberController::class, 'analyze']);
 
 // Halaman Dashboard Analytics
 Route::get('/dashboard', function () {

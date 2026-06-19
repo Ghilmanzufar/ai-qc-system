@@ -27,7 +27,7 @@
             <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
         </button>
         
-        <button class="h-11 px-4 sm:px-5 rounded-xl font-bold bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-colors shadow-sm flex items-center gap-2 text-sm">
+        <button id="btnEstop" class="h-11 px-4 sm:px-5 rounded-xl font-bold bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-colors shadow-sm flex items-center gap-2 text-sm">
             <span class="material-symbols-outlined text-[18px] material-symbols-filled">warning</span> <span class="hidden lg:inline">E-Stop</span>
         </button>
     </div>
