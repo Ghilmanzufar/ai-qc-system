@@ -193,8 +193,41 @@ document.addEventListener("DOMContentLoaded", function() {
                 .then(response => response.json())
                 .then(data => {
                     const isPass = data.result === 'PASS';
-                    window.showAlert("Hasil Analisis Selesai", `Sistem AI memutuskan bahwa Part ini: ${data.result}`, isPass ? 'success' : 'error');
+                    
+                    // 1. Munculkan Alert dari balasan Python
+                    window.showAlert("Hasil Analisis AI", data.message || `Sistem AI memutuskan: ${data.result}`, isPass ? 'success' : 'error');
 
+                    // 2. GAMBAR STEMPEL DIGITAL DI ATAS FOTO
+                    if (data.result !== 'ERROR') {
+                        const ctx = canvasElement.getContext('2d');
+                        
+                        // Pengaturan gaya font dan letak di tengah
+                        ctx.lineWidth = 12;
+                        ctx.font = "black 100px Arial";
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        
+                        // Geser titik tengah canvas, lalu putar miring sedikit (efek cap stempel)
+                        ctx.translate(canvasElement.width / 2, canvasElement.height / 2);
+                        ctx.rotate(-0.4); 
+                        
+                        if (isPass) {
+                            ctx.strokeStyle = "rgba(16, 185, 129, 0.8)"; // Hijau Emerald
+                            ctx.fillStyle = "rgba(16, 185, 129, 0.8)";
+                            ctx.strokeRect(-200, -80, 400, 160);
+                            ctx.fillText("PASS", 0, 10);
+                        } else {
+                            ctx.strokeStyle = "rgba(239, 68, 68, 0.8)"; // Merah Red
+                            ctx.fillStyle = "rgba(239, 68, 68, 0.8)";
+                            ctx.strokeRect(-180, -80, 360, 160);
+                            ctx.fillText("NG", 0, 10);
+                        }
+                        
+                        // Kembalikan posisi canvas seperti semula
+                        ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    }
+
+                    // 3. Kembalikan kondisi tombol
                     btnSubmit.innerHTML = originalHtml;
                     btnSubmit.disabled = false;
                     btnRetake.disabled = false;
