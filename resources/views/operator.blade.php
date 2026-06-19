@@ -9,26 +9,24 @@
         
         <div class="relative w-full md:w-1/3">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">category</span>
-            <input list="modelList" type="text" placeholder="Ketik atau Pilih Model..." class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium rounded-xl pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all placeholder:text-slate-400">
+            <input id="inputModel" list="modelList" type="text" placeholder="Ketik atau Pilih Model..." class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium rounded-xl pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all placeholder:text-slate-400">
+            
             <datalist id="modelList">
-                <option value="Motor Alpha X1"></option>
-                <option value="Mesin Beta V2"></option>
-                <option value="Rotor Gamma Z3"></option>
+                @foreach($models as $model)
+                    <option data-id="{{ $model->id }}" value="{{ $model->name }}"></option>
+                @endforeach
             </datalist>
         </div>
 
         <div class="relative w-full md:flex-1">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">extension</span>
-            <input list="partList" type="text" placeholder="Ketik atau Pilih Part No / Nama Part..." class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium rounded-xl pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all placeholder:text-slate-400">
+            <input id="inputPart" list="partList" type="text" placeholder="Pilih Model terlebih dahulu..." disabled class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium rounded-xl pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all placeholder:text-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed">
+            
             <datalist id="partList">
-                <option value="PN-8842-A | Housing Block"></option>
-                <option value="PN-4421-T | Titanium Flange"></option>
-                <option value="PN-9910-C | Stator QC"></option>
-                <option value="PN-1102-X | Bearing Cap"></option>
-            </datalist>
+                </datalist>
         </div>
 
-        <button class="w-full md:w-auto px-6 py-3 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 shrink-0">
+        <button id="btnMuatPart" class="w-full md:w-auto px-6 py-3 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 shrink-0">
             <span class="material-symbols-outlined text-[20px]">manage_search</span>
             Muat Part
         </button>
@@ -122,95 +120,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const videoElement = document.getElementById('kameraDepan');
-        const canvasElement = document.getElementById('canvasHasil');
-        const flashEffect = document.getElementById('flashEffect');
-        const statusKamera = document.getElementById('statusKamera');
-        
-        const btnScan = document.getElementById('btnScan');
-        const btnRetake = document.getElementById('btnRetake');
-        const btnSubmit = document.getElementById('btnSubmit');
-
-        let isPhotoTaken = false;
-
-        // 1. Menyalakan Kamera
-        navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } 
-        })
-        .then(stream => videoElement.srcObject = stream)
-        .catch(error => {
-            console.error("Kamera gagal:", error);
-            alert("Gagal mengakses kamera perangkat.");
-        });
-
-        // 2. Fungsi Mengambil Gambar (Jepret)
-        function takeSnapshot() {
-            if (isPhotoTaken) return; // Cegah jepret berulang
-
-            // Samakan ukuran canvas dengan resolusi asli video
-            canvasElement.width = videoElement.videoWidth;
-            canvasElement.height = videoElement.videoHeight;
-            
-            // Gambar frame video saat ini ke dalam canvas
-            const context = canvasElement.getContext('2d');
-            context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-
-            // Tampilkan efek Flash putih sekejap
-            flashEffect.classList.remove('opacity-0');
-            setTimeout(() => flashEffect.classList.add('opacity-0'), 150);
-
-            // Sembunyikan video live, tampilkan canvas statis
-            videoElement.classList.add('hidden');
-            canvasElement.classList.remove('hidden');
-
-            // Ubah Status Badge menjadi "CAPTURED"
-            statusKamera.innerHTML = '<span class="material-symbols-outlined text-[14px]">image</span> CAPTURED';
-            statusKamera.className = 'flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/20 backdrop-blur-md rounded-full text-indigo-400 text-xs font-semibold tracking-wide border border-indigo-500/30 transition-colors';
-
-            // Swap Tombol: Sembunyikan SCAN, Munculkan RETAKE & SUBMIT
-            btnScan.classList.add('hidden');
-            btnRetake.classList.remove('hidden');
-            btnSubmit.classList.remove('hidden');
-
-            isPhotoTaken = true;
-        }
-
-        // 3. Fungsi Ulangi Gambar (Retake)
-        function retakeSnapshot() {
-            // Sembunyikan canvas, kembali tampilkan video live
-            canvasElement.classList.add('hidden');
-            videoElement.classList.remove('hidden');
-
-            // Kembalikan Status Badge menjadi "READY"
-            statusKamera.innerHTML = '<span class="material-symbols-outlined text-[14px]">check_circle</span> READY';
-            statusKamera.className = 'flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 backdrop-blur-md rounded-full text-emerald-400 text-xs font-semibold tracking-wide border border-emerald-500/30 transition-colors';
-
-            // Swap Tombol: Kembalikan tombol SCAN
-            btnScan.classList.remove('hidden');
-            btnRetake.classList.add('hidden');
-            btnSubmit.classList.add('hidden');
-
-            isPhotoTaken = false;
-        }
-
-        // Event Listener untuk Tombol Click
-        btnScan.addEventListener('click', takeSnapshot);
-        btnRetake.addEventListener('click', retakeSnapshot);
-
-        // Event Listener untuk Tombol Spasi
-        document.addEventListener('keydown', function(event) {
-            // Cek jika menekan Spasi dan sedang tidak mengetik di dalam input/search box
-            if (event.code === 'Space' && event.target.tagName !== 'INPUT') {
-                event.preventDefault(); // Mencegah layar turun ke bawah saat spasi ditekan
-                if (!isPhotoTaken) {
-                    takeSnapshot();
-                }
-            }
-        });
-    });
-</script>
-@endpush

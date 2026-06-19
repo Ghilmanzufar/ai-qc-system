@@ -33,29 +33,5 @@
         </main>
 
     </div>
-
-    @stack('scripts')
-
-    <!-- Script Hamburger Menu yang sudah diperbaiki -->
-    <script>
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-
-        function toggleSidebar() {
-            // Geser sidebar masuk/keluar layar
-            sidebar.classList.toggle('-translate-x-full');
-            
-            // Atur efek gelap overlay
-            if (sidebar.classList.contains('-translate-x-full')) {
-                // Jika sidebar tertutup, hilangkan overlay
-                overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.classList.add('hidden'), 300);
-            } else {
-                // Jika sidebar terbuka, munculkan overlay
-                overlay.classList.remove('hidden');
-                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-            }
-        }
-    </script>
 </body>
 </html>
