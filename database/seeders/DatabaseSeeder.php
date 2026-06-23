@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Hash;
 class DatabaseSeeder extends Seeder
 {
     /**
-        * Seed the application's database.
-        */
+     * Seed the application's database.
+     */
     public function run(): void
     {
         // 1. Create Users (Admin, Supervisor, Operator)
@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
         $model1 = ProductModel::create([
             'name' => 'Kipas Angin Elektrik',
         ]);
-        
+
         $model2 = ProductModel::create([
             'name' => 'Botol Minum Plastik',
         ]);
@@ -53,7 +53,7 @@ class DatabaseSeeder extends Seeder
             'part_name' => 'Baling-Baling',
             'ai_model_file' => 'yolo26n.pt',
         ]);
-        
+
         Part::create([
             'product_model_id' => $model1->id,
             'part_no' => 'KP-002',

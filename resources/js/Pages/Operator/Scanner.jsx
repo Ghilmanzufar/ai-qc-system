@@ -9,6 +9,7 @@ export default function Scanner() {
     // States
     const [stats, setStats] = useState(initialStats || { total: 0, ok: 0, ng: 0 });
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     
     const [aiOffline, setAiOffline] = useState(false);
     const [currentTime, setCurrentTime] = useState('');
@@ -32,6 +33,7 @@ export default function Scanner() {
     const [frontCaptured, setFrontCaptured] = useState(null);
     const [frontResult, setFrontResult] = useState(null);
     const [isAnalyzingFront, setIsAnalyzingFront] = useState(false);
+    const [isFrontCompleted, setIsFrontCompleted] = useState(false);
 
     // --- BACK SIDE STATE ---
     const backVideoRef = useRef(null);
@@ -88,22 +90,33 @@ export default function Scanner() {
 
     // Start Back Camera
     useEffect(() => {
+        let currentStream = null;
+        
         const startBackCamera = async () => {
-            if (backStream) backStream.getTracks().forEach(t => t.stop());
-            if (!backCameraId) return;
+            if (!backCameraId || !isFrontCompleted) {
+                setBackStream(null);
+                return;
+            }
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { deviceId: { exact: backCameraId }, width: { ideal: 1920 }, height: { ideal: 1080 } }
                 });
+                currentStream = stream;
                 setBackStream(stream);
                 if (backVideoRef.current) backVideoRef.current.srcObject = stream;
             } catch (err) {
                 console.error("Back camera error:", err);
             }
         };
+        
         startBackCamera();
-        return () => { if (backStream) backStream.getTracks().forEach(t => t.stop()); };
-    }, [backCameraId]);
+        
+        return () => {
+            if (currentStream) {
+                currentStream.getTracks().forEach(t => t.stop());
+            }
+        };
+    }, [backCameraId, isFrontCompleted]);
 
     // Audio Feedback
     const playBeep = useCallback((type) => {
@@ -141,12 +154,16 @@ export default function Scanner() {
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (document.activeElement.tagName === 'SELECT') return;
+            if (isConfirmOpen) return; // Prevent actions when modal is open
             if (e.code === 'Space') {
                 e.preventDefault();
                 // Capture both if both are not analyzing and not captured
                 if (part && !aiOffline) {
-                    if (!frontCaptured && !isAnalyzingFront) capturePhoto('front');
-                    if (!backCaptured && !isAnalyzingBack) capturePhoto('back');
+                    if (!isFrontCompleted && !frontCaptured && !isAnalyzingFront && !frontResult) {
+                        capturePhoto('front');
+                    } else if (isFrontCompleted && !backCaptured && !isAnalyzingBack && !backResult) {
+                        capturePhoto('back');
+                    }
                 }
             } else if (e.code === 'Enter') {
                 e.preventDefault();
@@ -160,25 +177,31 @@ export default function Scanner() {
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [frontCaptured, backCaptured, isAnalyzingFront, isAnalyzingBack, part, aiOffline]);
+    }, [frontCaptured, backCaptured, isAnalyzingFront, isAnalyzingBack, part, aiOffline, isConfirmOpen]);
 
     // Auto dismiss results
     useEffect(() => {
-        if (frontResult && frontResult.status === 'NG') {
-            const timer = setTimeout(() => setFrontResult(null), 3000);
-            return () => clearTimeout(timer);
-        } else if (frontResult && frontResult.status === 'OK') {
-            const timer = setTimeout(() => setFrontResult(null), 1500);
+        if (frontResult && frontResult.status === 'OK') {
+            const timer = setTimeout(() => {
+                setFrontResult(null);
+                setIsFrontCompleted(true);
+            }, 1500);
             return () => clearTimeout(timer);
         }
     }, [frontResult]);
 
     useEffect(() => {
         if (backResult && backResult.status === 'NG') {
-            const timer = setTimeout(() => setBackResult(null), 3000);
+            const timer = setTimeout(() => {
+                setBackResult(null);
+                setIsFrontCompleted(false); // Reset session
+            }, 3000);
             return () => clearTimeout(timer);
         } else if (backResult && backResult.status === 'OK') {
-            const timer = setTimeout(() => setBackResult(null), 1500);
+            const timer = setTimeout(() => {
+                setBackResult(null);
+                setIsFrontCompleted(false); // Reset session
+            }, 1500);
             return () => clearTimeout(timer);
         }
     }, [backResult]);
@@ -209,6 +232,7 @@ export default function Scanner() {
         if (side === 'front') {
             setFrontCaptured(null);
             setFrontResult(null);
+            setIsFrontCompleted(false);
         } else {
             setBackCaptured(null);
             setBackResult(null);
@@ -312,6 +336,18 @@ export default function Scanner() {
                     <img src={captured} alt="Captured" className="absolute inset-0 w-full h-full object-contain bg-slate-900 z-10" />
                 )}
 
+                {/* Standby UI (Back Camera only) */}
+                {side === 'back' && !isFrontCompleted && (
+                    <div className="absolute inset-0 z-10 bg-slate-900 flex flex-col items-center justify-center">
+                        <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mb-4 border border-slate-700">
+                            <Camera className="w-10 h-10 text-slate-500" />
+                        </div>
+                        <p className="text-slate-400 font-bold tracking-widest text-sm text-center px-4">
+                            MENUNGGU ANALISIS DEPAN SELESAI
+                        </p>
+                    </div>
+                )}
+
                 {/* Reticle / Crosshair (only when live) */}
                 {stream && !captured && (
                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-40 group-hover:opacity-80 transition-opacity z-0">
@@ -354,9 +390,28 @@ export default function Scanner() {
                                 <>
                                     <XCircle className="w-28 h-28 text-white mb-4 drop-shadow-xl" />
                                     <h2 className="text-6xl font-black text-white drop-shadow-lg">REJECT</h2>
-                                    <div className="mt-6 px-8 py-3 bg-black/60 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl">
+                                    <div className="mt-6 px-8 py-3 bg-black/60 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl mb-6">
                                         <p className="text-white text-2xl font-bold uppercase tracking-wider">{result.defect_type || 'CACAT TERDETEKSI'}</p>
                                     </div>
+                                    {side === 'front' && (
+                                        <div className="flex gap-4 w-full max-w-sm">
+                                            <button 
+                                                onClick={() => retakePhoto('front')}
+                                                className="flex-1 py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors border border-slate-600 shadow-xl pointer-events-auto"
+                                            >
+                                                Retake Ulang
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    setFrontResult(null);
+                                                    setIsFrontCompleted(true);
+                                                }}
+                                                className="flex-1 py-3 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-400 transition-colors shadow-xl pointer-events-auto"
+                                            >
+                                                Lanjutkan
+                                            </button>
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>
@@ -447,6 +502,17 @@ export default function Scanner() {
                                 <p className="text-sm font-bold text-slate-800">Sesi Saat Ini</p>
                             </div>
                         </div>
+
+                        <button 
+                            onClick={() => {
+                                setIsSidebarOpen(false);
+                                setIsConfirmOpen(true);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-colors text-left"
+                        >
+                            <Settings2 className="w-5 h-5" />
+                            Persiapan Inspeksi
+                        </button>
                     </div>
 
                     <div className="p-4 border-t border-slate-100">
@@ -484,7 +550,7 @@ export default function Scanner() {
                             </span>
                         </div>
                         <button 
-                            onClick={() => router.get('/operator/setup')}
+                            onClick={() => setIsConfirmOpen(true)}
                             className="text-xs font-bold text-red-600 hover:text-white bg-red-50 hover:bg-red-600 border border-red-200 hover:border-transparent px-4 py-2 rounded-xl transition-all shadow-sm"
                         >
                             Selesaikan Batch
@@ -529,6 +595,35 @@ export default function Scanner() {
                         >
                             Tutup Peringatan
                         </button>
+                    </div>
+                )}
+
+                {/* Confirmation Modal */}
+                {isConfirmOpen && (
+                    <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex flex-col items-center justify-center p-6">
+                        <div className="bg-white rounded-[32px] p-12 max-w-2xl w-full shadow-2xl scale-up-animation border border-red-100">
+                            <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-8 mx-auto shadow-inner shadow-red-200">
+                                <AlertTriangle className="w-12 h-12 text-red-500" />
+                            </div>
+                            <h2 className="text-4xl font-black text-slate-800 mb-4 text-center tracking-tight">Ganti Model/Part?</h2>
+                            <p className="text-slate-500 text-xl text-center mb-10 leading-relaxed">
+                                Sesi inspeksi ini akan diakhiri jika Anda kembali ke halaman Persiapan Inspeksi. Lanjutkan?
+                            </p>
+                            <div className="flex gap-5">
+                                <button 
+                                    onClick={() => setIsConfirmOpen(false)}
+                                    className="flex-1 px-6 py-4 bg-slate-100 text-slate-700 text-xl font-bold rounded-2xl hover:bg-slate-200 transition-colors"
+                                >
+                                    Batal
+                                </button>
+                                <button 
+                                    onClick={() => router.get('/operator/setup')}
+                                    className="flex-1 px-6 py-4 bg-red-600 text-white text-xl font-bold rounded-2xl hover:bg-red-500 transition-colors shadow-lg shadow-red-500/30"
+                                >
+                                    Ya, Lanjut
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
 
