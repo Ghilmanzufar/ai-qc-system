@@ -15,11 +15,27 @@ use Inertia\Inertia;
 class InspectionController extends Controller
 {
     /**
-     * Tampilkan halaman Scanner untuk Operator.
+     * Tampilkan halaman Setup untuk memilih Part.
      */
-    public function scanner()
+    public function setup()
     {
         $models = ProductModel::with('parts')->get();
+
+        return Inertia::render('Operator/Setup', [
+            'productModels' => $models,
+        ]);
+    }
+
+    /**
+     * Tampilkan halaman Scanner untuk Operator.
+     */
+    public function scanner(Request $request)
+    {
+        if (!$request->has('part_id')) {
+            return redirect()->route('operator.setup');
+        }
+
+        $part = Part::with('productModel')->findOrFail($request->part_id);
 
         // Hitung statistik harian operator ini
         $todayCount = Inspection::where('user_id', Auth::id())
@@ -37,7 +53,7 @@ class InspectionController extends Controller
             ->count();
 
         return Inertia::render('Operator/Scanner', [
-            'productModels' => $models,
+            'part' => $part,
             'dailyStats' => [
                 'total' => $todayCount,
                 'ok' => $todayOk,

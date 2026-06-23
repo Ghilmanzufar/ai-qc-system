@@ -1,21 +1,25 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
 import axios from 'axios';
-import { CheckCircle2, XCircle, Camera, Send, AlertTriangle, Settings2, LogOut, Activity, Focus, Video } from 'lucide-react';
+import { CheckCircle2, XCircle, Camera, Send, AlertTriangle, Settings2, LogOut, Activity, Focus, Video, Menu, X, User, RefreshCcw } from 'lucide-react';
 
 export default function Scanner() {
-    const { productModels, dailyStats: initialStats, auth } = usePage().props;
+    const { part, dailyStats: initialStats, auth } = usePage().props;
     
     // States
     const [stats, setStats] = useState(initialStats || { total: 0, ok: 0, ng: 0 });
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     
-    // Selection State
-    const [selectedModel, setSelectedModel] = useState('');
-    const [selectedPart, setSelectedPart] = useState('');
-    const [isLocked, setIsLocked] = useState(false);
     const [aiOffline, setAiOffline] = useState(false);
+    const [currentTime, setCurrentTime] = useState('');
 
-    const availableParts = productModels.find(m => m.id.toString() === selectedModel)?.parts || [];
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
 
     // Camera Devices
     const [devices, setDevices] = useState([]);
@@ -140,7 +144,7 @@ export default function Scanner() {
             if (e.code === 'Space') {
                 e.preventDefault();
                 // Capture both if both are not analyzing and not captured
-                if (selectedPart && !aiOffline) {
+                if (part && !aiOffline) {
                     if (!frontCaptured && !isAnalyzingFront) capturePhoto('front');
                     if (!backCaptured && !isAnalyzingBack) capturePhoto('back');
                 }
@@ -148,11 +152,15 @@ export default function Scanner() {
                 e.preventDefault();
                 if (frontCaptured && !isAnalyzingFront) submitPhoto('front');
                 if (backCaptured && !isAnalyzingBack) submitPhoto('back');
+            } else if (e.code === 'Escape' || e.code === 'KeyR' || e.code === 'Backspace') {
+                e.preventDefault();
+                retakePhoto('front');
+                retakePhoto('back');
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [frontCaptured, backCaptured, isAnalyzingFront, isAnalyzingBack, selectedPart, aiOffline]);
+    }, [frontCaptured, backCaptured, isAnalyzingFront, isAnalyzingBack, part, aiOffline]);
 
     // Auto dismiss results
     useEffect(() => {
@@ -176,11 +184,7 @@ export default function Scanner() {
     }, [backResult]);
 
     const capturePhoto = (side) => {
-        if (!selectedPart) {
-            alert('Silakan pilih Model Produk dan Part terlebih dahulu!');
-            return;
-        }
-        setIsLocked(true);
+        if (!part) return;
         
         if (side === 'front' && frontVideoRef.current && frontCanvasRef.current) {
             const video = frontVideoRef.current;
@@ -213,7 +217,7 @@ export default function Scanner() {
 
     const submitPhoto = async (side) => {
         const image = side === 'front' ? frontCaptured : backCaptured;
-        if (!image || !selectedPart) return;
+        if (!image || !part) return;
 
         if (side === 'front') { setIsAnalyzingFront(true); setFrontResult(null); }
         else { setIsAnalyzingBack(true); setBackResult(null); }
@@ -222,7 +226,7 @@ export default function Scanner() {
 
         try {
             const response = await axios.post('/operator/analyze', {
-                part_id: selectedPart,
+                part_id: part.id,
                 image: image,
                 side: side
             });
@@ -365,10 +369,10 @@ export default function Scanner() {
                         {!captured ? (
                             <button 
                                 onClick={() => capturePhoto(side)}
-                                disabled={!selectedPart || !stream}
+                                disabled={!part || !stream}
                                 className={`
                                     w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-2xl group/btn
-                                    ${(!selectedPart || !stream) 
+                                    ${(!part || !stream) 
                                         ? 'bg-slate-800/80 text-slate-400 cursor-not-allowed border-4 border-slate-600/50 backdrop-blur-sm' 
                                         : 'bg-emerald-500 text-white hover:bg-emerald-400 active:scale-95 border-4 border-emerald-300 ring-4 ring-emerald-500/30'
                                     }
@@ -380,9 +384,9 @@ export default function Scanner() {
                             <div className="flex w-full gap-4">
                                 <button 
                                     onClick={() => retakePhoto(side)}
-                                    className="flex-1 py-4 bg-slate-800/90 backdrop-blur-md text-white text-lg font-bold rounded-2xl border-2 border-slate-600 hover:bg-slate-700 transition-colors shadow-xl"
+                                    className="flex-1 py-4 bg-slate-800/90 backdrop-blur-md text-white text-lg font-bold rounded-2xl border-2 border-slate-600 hover:bg-slate-700 transition-colors shadow-xl flex items-center justify-center gap-2"
                                 >
-                                    Batal
+                                    <RefreshCcw className="w-5 h-5" /> Retake
                                 </button>
                                 <button 
                                     onClick={() => submitPhoto(side)}
@@ -408,99 +412,108 @@ export default function Scanner() {
 
             <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
                 
-                {/* Navbar Premium */}
-                <nav className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm px-4 lg:px-8 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-amber-500 flex items-center justify-center shadow-md shadow-emerald-500/20">
-                            <Focus className="w-5 h-5 text-white" />
+                {/* Sidebar Overlay */}
+                {isSidebarOpen && (
+                    <div 
+                        className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] transition-opacity"
+                        onClick={() => setIsSidebarOpen(false)}
+                    />
+                )}
+
+                {/* Sidebar */}
+                <aside className={`fixed top-0 left-0 bottom-0 w-72 bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                    <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-amber-500 flex items-center justify-center shadow-md shadow-emerald-500/20">
+                                <Focus className="w-5 h-5 text-white" />
+                            </div>
+                            <h2 className="text-xl font-black text-slate-800 tracking-tight">Lens QC</h2>
                         </div>
-                        <div>
+                        <button 
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    
+                    <div className="flex-1 py-6 px-4 flex flex-col gap-2">
+                        <div className="px-4 py-3 mb-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
+                                <User className="w-5 h-5 text-slate-500" />
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-slate-500 uppercase">Operator Aktif</p>
+                                <p className="text-sm font-bold text-slate-800">Sesi Saat Ini</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-4 border-t border-slate-100">
+                        <button 
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                        >
+                            <LogOut className="w-5 h-5" />
+                            Keluar dari Sistem
+                        </button>
+                    </div>
+                </aside>
+
+                {/* Navbar Premium + Parameter Sesi */}
+                <nav className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="flex w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 items-center justify-center transition-colors"
+                        >
+                            <Menu className="w-5 h-5 text-slate-700" />
+                        </button>
+                        <div className="hidden xl:block">
                             <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-tight">Lens QC</h1>
                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Multi-Angle Inspection</p>
                         </div>
                     </div>
-                    
-                    {/* Statistik Harian */}
-                    <div className="hidden md:flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
-                        <div className="px-4 py-1 bg-white rounded-lg border border-slate-100 flex flex-col items-center">
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Total</span>
-                            <span className="text-base font-black text-slate-800 leading-none">{stats.total}</span>
-                        </div>
-                        <div className="px-4 py-1 bg-emerald-50 rounded-lg border border-emerald-100 flex flex-col items-center">
-                            <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Pass</span>
-                            <span className="text-base font-black text-emerald-700 leading-none">{stats.ok}</span>
-                        </div>
-                        <div className="px-4 py-1 bg-red-50 rounded-lg border border-red-100 flex flex-col items-center">
-                            <span className="text-[9px] font-bold text-red-600 uppercase tracking-wider">Reject</span>
-                            <span className="text-base font-black text-red-700 leading-none">{stats.ng}</span>
-                        </div>
-                    </div>
 
-                    <div className="flex items-center gap-4">
-                        <div className="hidden lg:flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
-                            <kbd className="font-mono text-emerald-600 bg-white px-1 py-0.5 rounded shadow-sm">Spasi</kbd> Jepret 
-                            <span className="mx-1 opacity-50">|</span>
-                            <kbd className="font-mono text-emerald-600 bg-white px-1 py-0.5 rounded shadow-sm">Enter</kbd> Kirim
+                    {/* Info Batch Aktif */}
+                    <div className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-3 min-w-[300px]">
+                        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl">
+                            <Activity className="w-4 h-4 text-emerald-500" />
+                            <span className="text-sm font-bold text-slate-700 whitespace-nowrap">
+                                {part?.product_model?.name} <span className="mx-2 text-slate-300">|</span> <span className="text-emerald-700">{part?.part_no}</span>
+                            </span>
                         </div>
                         <button 
-                            onClick={handleLogout}
-                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            onClick={() => router.get('/operator/setup')}
+                            className="text-xs font-bold text-red-600 hover:text-white bg-red-50 hover:bg-red-600 border border-red-200 hover:border-transparent px-4 py-2 rounded-xl transition-all shadow-sm"
                         >
-                            <LogOut className="w-4 h-4" />
-                            <span className="hidden sm:inline">Keluar</span>
+                            Selesaikan Batch
                         </button>
                     </div>
-                </nav>
-
-                {/* Filter Bar (Parameter Sesi di Atas) */}
-                <div className="bg-white px-4 lg:px-8 py-3 border-b border-slate-200/60 shadow-sm flex flex-col md:flex-row items-center gap-4 z-40 relative">
-                    <div className="flex items-center gap-2 text-slate-700 font-bold mr-2 whitespace-nowrap">
-                        <Settings2 className="w-5 h-5 text-emerald-500" /> 
-                        Parameter:
-                    </div>
                     
-                    <div className="flex-1 w-full flex flex-col md:flex-row gap-3">
-                        <select 
-                            className="w-full md:w-1/3 appearance-none bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all disabled:opacity-50"
-                            value={selectedModel}
-                            onChange={(e) => {
-                                setSelectedModel(e.target.value);
-                                setSelectedPart('');
-                            }}
-                            disabled={isLocked || isAnalyzingFront || isAnalyzingBack}
-                        >
-                            <option value="">-- Pilih Model --</option>
-                            {productModels.map(m => (
-                                <option key={m.id} value={m.id}>{m.name}</option>
-                            ))}
-                        </select>
-                        
-                        <select 
-                            className="w-full md:w-1/3 appearance-none bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all disabled:opacity-50"
-                            value={selectedPart}
-                            onChange={(e) => setSelectedPart(e.target.value)}
-                            disabled={!selectedModel || isLocked || isAnalyzingFront || isAnalyzingBack}
-                        >
-                            <option value="">-- Pilih Komponen --</option>
-                            {availableParts.map(p => (
-                                <option key={p.id} value={p.id}>{p.name}</option>
-                            ))}
-                        </select>
+                    {/* Statistik Harian */}
+                    <div className="hidden lg:flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
+                        <div className="px-3 py-1 bg-white rounded-lg border border-slate-100 flex flex-col items-center">
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Total</span>
+                            <span className="text-sm font-black text-slate-800 leading-none">{stats.total}</span>
+                        </div>
+                        <div className="px-3 py-1 bg-emerald-50 rounded-lg border border-emerald-100 flex flex-col items-center">
+                            <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Pass</span>
+                            <span className="text-sm font-black text-emerald-700 leading-none">{stats.ok}</span>
+                        </div>
+                        <div className="px-3 py-1 bg-red-50 rounded-lg border border-red-100 flex flex-col items-center">
+                            <span className="text-[9px] font-bold text-red-600 uppercase tracking-wider">Reject</span>
+                            <span className="text-sm font-black text-red-700 leading-none">{stats.ng}</span>
+                        </div>
                     </div>
 
-                    {isLocked && (
-                        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl whitespace-nowrap">
-                            <Activity className="w-4 h-4 text-amber-500" />
-                            <span className="text-sm font-bold text-amber-800">Batch Aktif</span>
-                            <button 
-                                onClick={() => { if(confirm('Akhiri batch scanning untuk komponen ini?')) setIsLocked(false); }}
-                                className="ml-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 px-3 py-1 rounded-lg transition-colors shadow-sm"
-                            >
-                                Ganti Part
-                            </button>
+                    {/* Jam & Action */}
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 text-sm font-black text-slate-700 bg-slate-100 px-4 py-2 rounded-xl border border-slate-200 min-w-[100px] justify-center">
+                            {currentTime || "Memuat..."}
                         </div>
-                    )}
-                </div>
+                    </div>
+                </nav>
 
                 {/* AI Offline Warning Modal */}
                 {aiOffline && (
