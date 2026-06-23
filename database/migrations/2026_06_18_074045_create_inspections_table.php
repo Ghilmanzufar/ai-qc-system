@@ -16,13 +16,14 @@ return new class extends Migration
             $table->string('inspection_code')->unique();
             
             // Relasi
-            $table->foreignId('part_id')->constrained('master_parts')->onDelete('cascade');
+            $table->foreignId('part_id')->constrained('parts')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             
             // Status Inspeksi
-            $table->enum('front_status', ['OK', 'DEFECT']);
-            $table->enum('back_status', ['OK', 'DEFECT']);
-            $table->enum('final_decision', ['PASS', 'REJECT']);
+            $table->enum('front_status', ['OK', 'NG'])->nullable();
+            $table->enum('back_status', ['OK', 'NG'])->nullable();
+            $table->enum('final_decision', ['PASS', 'NG']);
+            $table->string('defect_type')->nullable();
             
             // Lokasi Simpan Gambar
             $table->string('front_image_path')->nullable();

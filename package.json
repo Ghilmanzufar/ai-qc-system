@@ -15,5 +15,16 @@
         "postcss": "^8.5.15",
         "tailwindcss": "^4.3.1",
         "vite": "^7.0.7"
+    },
+    "dependencies": {
+        "@inertiajs/react": "^3.4.0",
+        "@vitejs/plugin-react": "^4.7.0",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "lucide-react": "^1.21.0",
+        "react": "^19.2.7",
+        "react-dom": "^19.2.7",
+        "react-webcam": "^7.2.0",
+        "tailwind-merge": "^3.6.0"
     }
 }

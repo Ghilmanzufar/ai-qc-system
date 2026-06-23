@@ -8,4 +8,9 @@ class ProductModel extends Model
 {
     // Ini untuk tabel product_models
     protected $fillable = ['name'];
+
+    public function parts()
+    {
+        return $this->hasMany(Part::class);
+    }
 }

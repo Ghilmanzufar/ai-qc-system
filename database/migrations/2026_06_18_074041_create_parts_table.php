@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('product_model_id')->constrained('product_models')->cascadeOnDelete();
             $table->string('part_no');
             $table->string('part_name');
+            $table->string('ai_model_file')->nullable();
             $table->timestamps();
         });
     }
