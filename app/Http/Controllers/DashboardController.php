@@ -16,13 +16,60 @@ class DashboardController extends Controller
      */
     public function adminDashboard()
     {
+        $today = now()->toDateString();
+
+        // 1. Daily Stats
+        $todayInspections = Inspection::whereDate('created_at', $today)->count();
+        $todayPass = Inspection::whereDate('created_at', $today)->where('final_decision', 'PASS')->count();
+        $todayNg = Inspection::whereDate('created_at', $today)->where('final_decision', 'NG')->count();
+        $yieldRate = $todayInspections > 0 ? round(($todayPass / $todayInspections) * 100, 1) : 0;
+
+        $activeOperators = Inspection::whereDate('created_at', $today)
+                            ->distinct('user_id')
+                            ->count('user_id');
+
+        // 2. Trend Last 7 Days
+        $trendData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->toDateString();
+            $label = now()->subDays($i)->translatedFormat('D'); // Mon, Tue, dll
+            
+            $passCount = Inspection::whereDate('created_at', $date)->where('final_decision', 'PASS')->count();
+            $ngCount = Inspection::whereDate('created_at', $date)->where('final_decision', 'NG')->count();
+            
+            $trendData[] = [
+                'name' => $label,
+                'pass' => $passCount,
+                'ng' => $ngCount,
+            ];
+        }
+
+        // 3. Top Defects Today
+        $topDefects = Inspection::whereDate('created_at', $today)
+                        ->where('final_decision', 'NG')
+                        ->whereNotNull('defect_type')
+                        ->select('defect_type', \DB::raw('count(*) as total'))
+                        ->groupBy('defect_type')
+                        ->orderByDesc('total')
+                        ->limit(4)
+                        ->get();
+
+        // 4. Recent Activity (Global)
+        $recentActivity = Inspection::with(['user:id,name', 'part:id,part_no'])
+                            ->orderBy('created_at', 'desc')
+                            ->limit(10)
+                            ->get();
+
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
-                'totalUsers' => User::count(),
-                'totalParts' => Part::count(),
-                'totalModels' => ProductModel::count(),
-                'totalInspections' => Inspection::count(),
+                'todayInspections' => $todayInspections,
+                'yieldRate' => $yieldRate,
+                'todayNg' => $todayNg,
+                'activeOperators' => $activeOperators,
             ],
+            'trendData' => $trendData,
+            'topDefects' => $topDefects,
+            'recentActivity' => $recentActivity
         ]);
     }
 

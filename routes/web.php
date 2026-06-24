@@ -51,6 +51,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/parts', [AdminController::class, 'storePart'])->name('parts.store');
     Route::put('/parts/{part}', [AdminController::class, 'updatePart'])->name('parts.update');
     Route::delete('/parts/{part}', [AdminController::class, 'deletePart'])->name('parts.delete');
+
+    // Announcements Management
+    Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+    Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
+    Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
 });
 
 // ==========================================

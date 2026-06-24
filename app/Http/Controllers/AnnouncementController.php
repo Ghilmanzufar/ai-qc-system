@@ -10,6 +10,52 @@ use Illuminate\Support\Facades\Auth;
 class AnnouncementController extends Controller
 {
     /**
+     * [ADMIN] Tampilkan halaman manajemen pengumuman
+     */
+    public function index()
+    {
+        $announcements = Announcement::with('creator:id,name')
+            ->withCount('reads')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return inertia('Admin/Announcements/Index', [
+            'announcements' => $announcements
+        ]);
+    }
+
+    /**
+     * [ADMIN] Buat pengumuman baru
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'body' => 'required|string',
+            'type' => 'required|in:broadcast,alert',
+            'target_role' => 'required|in:all,operator,supervisor',
+            'expires_at' => 'nullable|date|after:now',
+        ]);
+
+        $validated['created_by'] = Auth::id();
+        $validated['is_active'] = true;
+
+        Announcement::create($validated);
+
+        return redirect()->back()->with('success', 'Pengumuman berhasil dibuat dan sedang disiarkan.');
+    }
+
+    /**
+     * [ADMIN] Nonaktifkan pengumuman (soft delete / set is_active = false)
+     */
+    public function destroy($id)
+    {
+        $announcement = Announcement::findOrFail($id);
+        $announcement->update(['is_active' => false]);
+
+        return redirect()->back()->with('success', 'Pengumuman berhasil dihentikan.');
+    }
+    /**
      * [OPERATOR] API polling: ambil semua pengumuman aktif yang relevan untuk operator ini.
      * Dipanggil setiap 30 detik oleh frontend Operator.
      */

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, usePage, useForm, router } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
 
 const roleBadgeColors = {
     admin: 'bg-indigo-50 text-indigo-700 border-indigo-200',
@@ -129,7 +129,7 @@ function UserModal({ isOpen, onClose, editUser }) {
 
 // ========== MAIN PAGE ==========
 export default function Users() {
-    const { users, flash } = usePage().props;
+    const { users, flash, auth } = usePage().props;
     const [modalOpen, setModalOpen] = useState(false);
     const [editUser, setEditUser] = useState(null);
 
@@ -142,7 +142,7 @@ export default function Users() {
     };
 
     return (
-        <AuthenticatedLayout>
+        <AdminLayout title="Manajemen User" user={auth.user}>
             <Head title="Kelola User" />
 
             {/* Flash Message */}
@@ -254,6 +254,6 @@ export default function Users() {
 
             {/* Modal */}
             <UserModal isOpen={modalOpen} onClose={() => setModalOpen(false)} editUser={editUser} />
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }

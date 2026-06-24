@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, usePage, useForm, router } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
 
 // ========== MODALS ==========
 function ModelModal({ isOpen, onClose }) {
@@ -107,7 +107,7 @@ function PartModal({ isOpen, onClose, modelId, editPart }) {
 
 // ========== MAIN PAGE ==========
 export default function Products() {
-    const { productModels, flash } = usePage().props;
+    const { productModels, flash, auth } = usePage().props;
     const [modelModalOpen, setModelModalOpen] = useState(false);
     const [partModal, setPartModal] = useState({ open: false, modelId: null, editPart: null });
 
@@ -124,9 +124,7 @@ export default function Products() {
     };
 
     return (
-        <AuthenticatedLayout>
-            <Head title="Kelola Produk" />
-
+        <AdminLayout title="Manajemen Produk & Part" user={auth.user}>
             {flash?.success && (
                 <div className="mb-4 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium">
                     ✓ {flash.success}
@@ -279,6 +277,6 @@ export default function Products() {
             {/* Modals */}
             <ModelModal isOpen={modelModalOpen} onClose={() => setModelModalOpen(false)} />
             <PartModal isOpen={partModal.open} onClose={() => setPartModal({ open: false, modelId: null, editPart: null })} modelId={partModal.modelId} editPart={partModal.editPart} />
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }

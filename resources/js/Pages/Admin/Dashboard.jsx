@@ -1,123 +1,222 @@
-import { Head, usePage, Link } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import React from 'react';
+import { Head, usePage } from '@inertiajs/react';
+import AdminLayout from '@/Layouts/AdminLayout';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Activity, Camera, AlertTriangle, Users, Package, Clock, CheckCircle2 } from 'lucide-react';
 
-const StatCard = ({ label, value, color, icon, href }) => (
-    <Link href={href} className="no-underline group">
-        <div className={`bg-white rounded-2xl p-5 sm:p-6 border border-gray-100
-            shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5`}>
-            <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">{label}</span>
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg`}
-                    style={{ background: `linear-gradient(135deg, ${color}, ${color}dd)`, boxShadow: `0 4px 14px ${color}33` }}>
-                    {icon}
-                </div>
-            </div>
-            <p className="text-3xl sm:text-4xl font-bold text-gray-900">{value}</p>
-            <p className="text-xs text-gray-400 mt-2 group-hover:text-indigo-500 transition-colors">
-                Klik untuk kelola →
-            </p>
+const COLORS = ['#ef4444', '#f97316', '#eab308', '#3b82f6'];
+
+const StatCard = ({ title, value, subtitle, icon: Icon, colorClass, bgClass }) => (
+    <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-all">
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${bgClass} ${colorClass}`}>
+            <Icon className="w-7 h-7" />
         </div>
-    </Link>
+        <div>
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{title}</p>
+            <h3 className="text-3xl font-black text-slate-800 tracking-tight">{value}</h3>
+            <p className="text-xs font-semibold mt-1 text-slate-500">{subtitle}</p>
+        </div>
+    </div>
 );
 
 export default function Dashboard() {
-    const { stats } = usePage().props;
+    const { stats, trendData, topDefects, recentActivity, auth } = usePage().props;
 
     return (
-        <AuthenticatedLayout>
+        <AdminLayout title="Dashboard Analytics" user={auth?.user}>
             <Head title="Admin Dashboard" />
 
-            {/* Header */}
-            <div className="mb-6 sm:mb-8">
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
-                <p className="text-sm text-gray-500 mt-1">Ringkasan data sistem AI QC Anda</p>
+            <div className="mb-8">
+                <h1 className="text-3xl font-black text-slate-800 tracking-tight">Overview Hari Ini</h1>
+                <p className="text-slate-500 mt-1 font-medium">Pantauan real-time aktivitas inspeksi AI QC di seluruh lini produksi.</p>
             </div>
 
-            {/* Stats Grid — responsive: 1 col mobile, 2 col tablet, 4 col desktop */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
-                <StatCard
-                    label="Total Users"
-                    value={stats?.totalUsers ?? 0}
-                    color="#6366f1"
-                    href="/admin/users"
-                    icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>}
+            {/* Top Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                <StatCard 
+                    title="Total Inspeksi" 
+                    value={stats?.todayInspections || 0} 
+                    subtitle="Part di-scan hari ini"
+                    icon={Camera}
+                    colorClass="text-blue-600"
+                    bgClass="bg-blue-50"
                 />
-                <StatCard
-                    label="Model Produk"
-                    value={stats?.totalModels ?? 0}
-                    color="#8b5cf6"
-                    href="/admin/products"
-                    icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>}
+                <StatCard 
+                    title="Global Yield Rate" 
+                    value={`${stats?.yieldRate || 0}%`} 
+                    subtitle="Tingkat kelulusan (PASS)"
+                    icon={Activity}
+                    colorClass="text-emerald-600"
+                    bgClass="bg-emerald-50"
                 />
-                <StatCard
-                    label="Total Parts"
-                    value={stats?.totalParts ?? 0}
-                    color="#2a9d90"
-                    href="/admin/products"
-                    icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>}
+                <StatCard 
+                    title="Total Defect / NG" 
+                    value={stats?.todayNg || 0} 
+                    subtitle="Part ditolak hari ini"
+                    icon={AlertTriangle}
+                    colorClass="text-red-600"
+                    bgClass="bg-red-50"
                 />
-                <StatCard
-                    label="Total Inspeksi"
-                    value={stats?.totalInspections ?? 0}
-                    color="#e76e50"
-                    href="/admin/products"
-                    icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>}
+                <StatCard 
+                    title="Operator Aktif" 
+                    value={stats?.activeOperators || 0} 
+                    subtitle="Bekerja pada shift ini"
+                    icon={Users}
+                    colorClass="text-purple-600"
+                    bgClass="bg-purple-50"
                 />
             </div>
 
-            {/* Quick Actions */}
-            <div className="mt-8 sm:mt-10">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Aksi Cepat</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    <Link href="/admin/users" className="no-underline">
-                        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm
-                            hover:shadow-md hover:border-indigo-200 transition-all duration-300 cursor-pointer group">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600
-                                    group-hover:bg-indigo-100 transition-colors">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-gray-900 text-[15px]">Tambah User Baru</p>
-                                    <p className="text-xs text-gray-400 mt-0.5">Operator, Supervisor, atau Admin</p>
-                                </div>
-                            </div>
-                        </div>
-                    </Link>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                {/* Main Trend Chart */}
+                <div className="lg:col-span-2 bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm">
+                    <div className="mb-6">
+                        <h3 className="text-lg font-bold text-slate-800">Tren Inspeksi (7 Hari Terakhir)</h3>
+                        <p className="text-sm text-slate-500">Perbandingan produk lulus uji (PASS) vs gagal uji (NG).</p>
+                    </div>
+                    <div className="h-72 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={trendData || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="colorPass" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                    </linearGradient>
+                                    <linearGradient id="colorNg" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
+                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
+                                <Tooltip 
+                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
+                                    cursor={{ stroke: '#e2e8f0', strokeWidth: 2, strokeDasharray: '5 5' }}
+                                />
+                                <Area type="monotone" dataKey="pass" name="PASS" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorPass)" />
+                                <Area type="monotone" dataKey="ng" name="NG" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorNg)" />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
 
-                    <Link href="/admin/products" className="no-underline">
-                        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm
-                            hover:shadow-md hover:border-purple-200 transition-all duration-300 cursor-pointer group">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600
-                                    group-hover:bg-purple-100 transition-colors">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-gray-900 text-[15px]">Kelola Produk & Part</p>
-                                    <p className="text-xs text-gray-400 mt-0.5">Tambah model dan set AI file</p>
-                                </div>
+                {/* Top Defects Pie Chart */}
+                <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm flex flex-col">
+                    <div className="mb-2">
+                        <h3 className="text-lg font-bold text-slate-800">Top 4 Jenis Defect (Hari Ini)</h3>
+                        <p className="text-sm text-slate-500">Distribusi masalah terbanyak.</p>
+                    </div>
+                    {topDefects && topDefects.length > 0 ? (
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                            <div className="h-48 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={topDefects}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={80}
+                                            paddingAngle={5}
+                                            dataKey="total"
+                                        >
+                                            {topDefects.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip 
+                                            formatter={(value) => [`${value} Part`, 'Jumlah']}
+                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className="w-full grid grid-cols-2 gap-2 mt-4">
+                                {topDefects.map((defect, index) => (
+                                    <div key={index} className="flex items-center gap-2 text-xs">
+                                        <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                                        <span className="text-slate-600 truncate" title={defect.defect_type}>{defect.defect_type}</span>
+                                        <span className="font-bold text-slate-800 ml-auto">{defect.total}</span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
-                    </Link>
-
-                    <Link href="/supervisor/dashboard" className="no-underline">
-                        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm
-                            hover:shadow-md hover:border-teal-200 transition-all duration-300 cursor-pointer group">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600
-                                    group-hover:bg-teal-100 transition-colors">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-gray-900 text-[15px]">Live Monitoring</p>
-                                    <p className="text-xs text-gray-400 mt-0.5">Lihat statistik real-time</p>
-                                </div>
+                    ) : (
+                        <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                                <CheckCircle2 className="w-8 h-8 text-slate-300" />
                             </div>
+                            <p className="text-sm font-bold text-slate-500">Belum Ada Defect Hari Ini</p>
+                            <p className="text-xs text-slate-400 mt-1">Luar biasa! Produksi berjalan sempurna sejauh ini.</p>
                         </div>
-                    </Link>
+                    )}
                 </div>
             </div>
-        </AuthenticatedLayout>
+
+            {/* Recent Activity */}
+            <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 className="text-lg font-bold text-slate-800">Aktivitas Inspeksi Terbaru (Global)</h3>
+                        <p className="text-sm text-slate-500">10 data pemindaian terakhir dari semua lini.</p>
+                    </div>
+                </div>
+                
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="border-b border-slate-100 text-slate-400 text-xs uppercase tracking-wider">
+                                <th className="pb-3 font-semibold w-24">Waktu</th>
+                                <th className="pb-3 font-semibold">Operator</th>
+                                <th className="pb-3 font-semibold">Part Number</th>
+                                <th className="pb-3 font-semibold text-center w-24">Status AI</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            {recentActivity?.map((activity) => (
+                                <tr key={activity.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <td className="py-3">
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            <Clock className="w-4 h-4 text-slate-300" />
+                                            {new Date(activity.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                                        </div>
+                                    </td>
+                                    <td className="py-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
+                                                {activity.user?.name?.charAt(0) || '?'}
+                                            </div>
+                                            <span className="text-sm font-bold text-slate-700">{activity.user?.name || 'Unknown'}</span>
+                                        </div>
+                                    </td>
+                                    <td className="py-3">
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Package className="w-4 h-4 text-slate-400" />
+                                            <span className="font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded">{activity.part?.part_no || 'Unknown'}</span>
+                                        </div>
+                                    </td>
+                                    <td className="py-3 text-center">
+                                        {activity.final_decision === 'PASS' ? (
+                                            <span className="inline-flex px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-black tracking-wider rounded-lg">PASS</span>
+                                        ) : (
+                                            <span className="inline-flex px-3 py-1 bg-red-100 text-red-700 text-xs font-black tracking-wider rounded-lg">NG</span>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                            {(!recentActivity || recentActivity.length === 0) && (
+                                <tr>
+                                    <td colSpan="4" className="py-8 text-center text-slate-400 text-sm">
+                                        Belum ada aktivitas inspeksi hari ini.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </AdminLayout>
     );
 }
