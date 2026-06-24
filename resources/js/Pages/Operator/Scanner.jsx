@@ -82,8 +82,8 @@ export default function Scanner() {
 
                 <OperatorTopbar 
                     onMenuClick={() => setIsSidebarOpen(true)}
-                    title="Lens QC"
-                    subtitle="Multi-Angle Inspection"
+                    title="Camera Inspection"
+                    subtitle="AI Camera Scanner"
                     centerContent={
                         <>
                             <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl shadow-sm">

@@ -12,7 +12,7 @@ export default function AdminLayout({ children, title, user }) {
 
     return (
         <div className="min-h-screen bg-slate-50 flex font-sans">
-            <Head title={`${title} - Admin Lens QC`} />
+            <Head title={`${title} - Admin Camera Inspection`} />
 
             {/* Sidebar */}
             <AdminSidebar 

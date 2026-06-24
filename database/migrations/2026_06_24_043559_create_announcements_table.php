@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('body');
             $table->enum('type', ['broadcast', 'alert'])->default('broadcast');
-            $table->enum('target_role', ['all', 'operator', 'supervisor'])->default('all');
+            $table->enum('target_role', ['all', 'member', 'supervisor'])->default('all');
             $table->boolean('is_active')->default(true);
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->timestamp('expires_at')->nullable();

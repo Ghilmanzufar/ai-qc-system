@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import { X, User, LogOut, Box, History, LayoutDashboard } from 'lucide-react';
+import LogoutConfirmModal from '@/Components/Operator/Shared/LogoutConfirmModal';
 
 export default function OperatorSidebar({ isOpen, onClose, onLogout, onSetupClick, onHistoryClick, children }) {
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     return (
         <>
             {/* Sidebar Overlay */}
@@ -17,7 +19,7 @@ export default function OperatorSidebar({ isOpen, onClose, onLogout, onSetupClic
             <aside className={`fixed top-0 left-0 bottom-0 w-72 bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <h2 className="text-xl font-black text-slate-800 tracking-tight">Lens QC</h2>
+                        <h2 className="text-xl font-black text-slate-800 tracking-tight">Camera Inspection</h2>
                     </div>
                     <button 
                         onClick={onClose}
@@ -82,13 +84,13 @@ export default function OperatorSidebar({ isOpen, onClose, onLogout, onSetupClic
                             <User className="w-5 h-5 text-slate-500" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Operator Aktif</p>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Member Aktif</p>
                             <p className="text-sm font-black text-slate-800 truncate">Sesi Saat Ini</p>
                         </div>
                     </div>
 
                     <button 
-                        onClick={onLogout}
+                        onClick={() => setIsLogoutModalOpen(true)}
                         className="w-full flex items-center justify-center gap-3 px-4 py-2.5 text-sm font-bold text-red-600 hover:text-white bg-red-50 hover:bg-red-600 rounded-xl transition-colors border border-red-100 hover:border-transparent shadow-sm"
                     >
                         <LogOut className="w-5 h-5" />
@@ -96,6 +98,12 @@ export default function OperatorSidebar({ isOpen, onClose, onLogout, onSetupClic
                     </button>
                 </div>
             </aside>
+
+            <LogoutConfirmModal 
+                isOpen={isLogoutModalOpen} 
+                onClose={() => setIsLogoutModalOpen(false)} 
+                onConfirm={onLogout} 
+            />
         </>
     );
 }

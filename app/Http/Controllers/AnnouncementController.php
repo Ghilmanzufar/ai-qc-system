@@ -33,7 +33,7 @@ class AnnouncementController extends Controller
             'title' => 'required|string|max:255',
             'body' => 'required|string',
             'type' => 'required|in:broadcast,alert',
-            'target_role' => 'required|in:all,operator,supervisor',
+            'target_role' => 'required|in:all,member,supervisor',
             'expires_at' => 'nullable|date|after:now',
         ]);
 

@@ -58,7 +58,7 @@ export default function Dashboard() {
                     bgClass="bg-red-50"
                 />
                 <StatCard 
-                    title="Operator Aktif" 
+                    title="Member Aktif" 
                     value={stats?.activeOperators || 0} 
                     subtitle="Bekerja pada shift ini"
                     icon={Users}
@@ -168,7 +168,7 @@ export default function Dashboard() {
                         <thead>
                             <tr className="border-b border-slate-100 text-slate-400 text-xs uppercase tracking-wider">
                                 <th className="pb-3 font-semibold w-24">Waktu</th>
-                                <th className="pb-3 font-semibold">Operator</th>
+                                <th className="pb-3 font-semibold">Member</th>
                                 <th className="pb-3 font-semibold">Part Number</th>
                                 <th className="pb-3 font-semibold text-center w-24">Status AI</th>
                             </tr>

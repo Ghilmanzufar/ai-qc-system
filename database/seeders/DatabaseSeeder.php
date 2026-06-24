@@ -31,10 +31,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Operator Line 1',
-            'email' => 'operator1@aiqc.com',
+            'name' => 'Member Line 1',
+            'email' => 'member1@aiqc.com',
             'password' => Hash::make('password'),
-            'role' => 'operator',
+            'role' => 'member',
         ]);
 
         // 2. Create Dummy Product Models

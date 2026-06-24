@@ -27,7 +27,7 @@ Route::get('/', function () {
     return match ($user->role) {
         'admin' => redirect()->route('admin.dashboard'),
         'supervisor' => redirect()->route('supervisor.dashboard'),
-        'operator' => redirect()->route('operator.dashboard'),
+        'member' => redirect()->route('operator.dashboard'),
         default => redirect()->route('login'),
     };
 })->middleware('auth');
@@ -67,9 +67,9 @@ Route::middleware(['auth', 'role:supervisor,admin'])->prefix('supervisor')->name
 });
 
 // ==========================================
-// OPERATOR ROUTES
+// MEMBER ROUTES
 // ==========================================
-Route::middleware(['auth', 'role:operator,admin'])->prefix('operator')->name('operator.')->group(function () {
+Route::middleware(['auth', 'role:member,admin'])->prefix('member')->name('operator.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'operatorDashboard'])->name('dashboard');
     Route::get('/setup', [InspectionController::class, 'setup'])->name('setup');
     Route::get('/scanner', [InspectionController::class, 'scanner'])->name('scanner');

@@ -28,7 +28,7 @@ export default function Dashboard({ stats, recentActivity, auth }) {
 
     return (
         <div className="min-h-screen w-full bg-[#F8FAFC] flex flex-col font-sans overflow-hidden relative selection:bg-blue-500 selection:text-white">
-            <Head title="Dashboard Kinerja - Lens QC" />
+            <Head title="Dashboard Kinerja - Camera Inspection" />
 
             {/* Light Mode Premium Background Effects */}
             <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-blue-400/20 rounded-full blur-[120px] pointer-events-none animate-pulse" style={{ animationDuration: '8s' }}></div>
@@ -52,8 +52,8 @@ export default function Dashboard({ stats, recentActivity, auth }) {
 
             <OperatorTopbar
                 onMenuClick={() => setIsSidebarOpen(true)}
-                title="Lens QC"
-                subtitle="Dashboard Kinerja Operator"
+                title="Camera Inspection"
+                subtitle="Dashboard Kinerja Member"
                 extraClasses="bg-white/80 backdrop-blur-xl border-b border-slate-200"
                 rightContent={
                     <div className="flex items-center gap-2 text-sm font-black text-slate-700 bg-white px-5 py-2.5 rounded-2xl border border-slate-200 shadow-sm">
@@ -81,7 +81,7 @@ export default function Dashboard({ stats, recentActivity, auth }) {
                                 </span>
                             </div>
                             <h1 className="text-4xl md:text-5xl font-black text-slate-800 mb-3 tracking-tight">
-                                {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{auth?.user?.name || 'Operator'}</span>
+                                {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{auth?.user?.name || 'Member'}</span>
                             </h1>
                             <p className="text-slate-500 text-lg font-medium max-w-xl">
                                 Pantau terus performa dan kualitas inspeksi Anda hari ini. Tetap fokus dan capai target!

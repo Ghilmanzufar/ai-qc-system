@@ -5,13 +5,13 @@ import AdminLayout from '@/Layouts/AdminLayout';
 const roleBadgeColors = {
     admin: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     supervisor: 'bg-amber-50 text-amber-700 border-amber-200',
-    operator: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    member: 'bg-emerald-50 text-emerald-700 border-emerald-200',
 };
 
 const roleLabels = {
     admin: 'Admin',
     supervisor: 'Supervisor',
-    operator: 'Operator',
+    member: 'Member',
 };
 
 // ========== MODAL COMPONENT ==========
@@ -20,7 +20,7 @@ function UserModal({ isOpen, onClose, editUser }) {
         name: editUser?.name || '',
         email: editUser?.email || '',
         password: '',
-        role: editUser?.role || 'operator',
+        role: editUser?.role || 'member',
     });
 
     const handleSubmit = (e) => {
@@ -101,7 +101,7 @@ function UserModal({ isOpen, onClose, editUser }) {
                                     bg-white cursor-pointer appearance-none"
                                 style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 12px center', backgroundRepeat: 'no-repeat', backgroundSize: '20px' }}
                             >
-                                <option value="operator">Operator</option>
+                                <option value="member">Member</option>
                                 <option value="supervisor">Supervisor</option>
                                 <option value="admin">Admin</option>
                             </select>

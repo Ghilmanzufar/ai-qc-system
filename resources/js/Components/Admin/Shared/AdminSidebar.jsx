@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { LayoutDashboard, Megaphone, Users, Package, FileText, Settings, LogOut, X } from 'lucide-react';
+import LogoutConfirmModal from '@/Components/Operator/Shared/LogoutConfirmModal';
 
 export default function AdminSidebar({ isOpen, onClose, onLogout, user }) {
     const { url } = usePage();
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
     const menuItems = [
         {
@@ -63,7 +65,7 @@ export default function AdminSidebar({ isOpen, onClose, onLogout, user }) {
                         <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
                             QC
                         </div>
-                        <span className="text-lg font-black text-white tracking-tight">Lens Admin</span>
+                        <span className="text-lg font-black text-white tracking-tight">Camera Inspection</span>
                     </div>
                     <button onClick={onClose} className="md:hidden text-slate-400 hover:text-white">
                         <X className="w-6 h-6" />
@@ -101,7 +103,7 @@ export default function AdminSidebar({ isOpen, onClose, onLogout, user }) {
                     </div>
 
                     <button 
-                        onClick={onLogout}
+                        onClick={() => setIsLogoutModalOpen(true)}
                         className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:text-white hover:bg-red-500 rounded-xl transition-colors font-medium"
                     >
                         <LogOut className="w-5 h-5" />
@@ -109,6 +111,12 @@ export default function AdminSidebar({ isOpen, onClose, onLogout, user }) {
                     </button>
                 </div>
             </aside>
+
+            <LogoutConfirmModal 
+                isOpen={isLogoutModalOpen} 
+                onClose={() => setIsLogoutModalOpen(false)} 
+                onConfirm={onLogout} 
+            />
         </>
     );
 }

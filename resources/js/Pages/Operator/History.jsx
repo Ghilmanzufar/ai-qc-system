@@ -35,7 +35,7 @@ export default function History({ inspections }) {
 
     return (
         <div className="h-screen w-full max-w-[100vw] bg-[#F8FAFC] flex flex-col font-sans overflow-hidden relative">
-            <Head title="Riwayat Inspeksi - Lens QC" />
+            <Head title="Riwayat Inspeksi - Camera Inspection" />
 
             {/* Background Effects */}
             <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-3xl -translate-x-1/3 -translate-y-1/3 pointer-events-none animate-pulse" style={{ animationDuration: '8s' }}></div>
@@ -68,7 +68,7 @@ export default function History({ inspections }) {
 
             <OperatorTopbar
                 onMenuClick={() => setIsSidebarOpen(true)}
-                title="Lens QC"
+                title="Camera Inspection"
                 subtitle="Riwayat Inspeksi Harian"
                 extraClasses="bg-white/80 backdrop-blur-md border-b border-slate-200/50"
                 rightContent={

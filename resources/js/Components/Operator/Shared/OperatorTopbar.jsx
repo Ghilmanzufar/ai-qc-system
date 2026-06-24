@@ -12,7 +12,7 @@ export default function OperatorTopbar({ onMenuClick, title, subtitle, rightCont
                     <Menu className="w-6 h-6 text-slate-700" />
                 </button>
                 <div className="hidden xl:block">
-                    <h1 className="text-lg font-black text-slate-900 tracking-tight leading-tight">{title || "Lens QC"}</h1>
+                    <h1 className="text-lg font-black text-slate-900 tracking-tight leading-tight">{title || "Camera Inspection"}</h1>
                     {subtitle && (
                         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{subtitle}</p>
                     )}

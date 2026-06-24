@@ -44,25 +44,28 @@ export default function Setup({ productModels }) {
 
     return (
         <>
-            <Head title="Setup Batch - Lens QC" />
-            
+            <Head title="Setup Batch - Camera Inspection" />
+
             {/* Background Premium dengan Pattern dan Glow */}
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/30 to-orange-50/30 flex flex-col font-sans relative overflow-hidden">
+            <div className="min-h-screen bg-slate-50 flex flex-col font-sans relative overflow-hidden">
+                {/* Subtle Tech Dot Pattern */}
+                <div className="absolute inset-0 opacity-[0.35]" style={{ backgroundImage: 'radial-gradient(#94a3b8 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+
                 {/* Abstract Glow Background Elements */}
-                <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-emerald-500/15 rounded-full blur-3xl -translate-x-1/3 -translate-y-1/3 pointer-events-none animate-pulse" style={{ animationDuration: '8s' }}></div>
-                <div className="absolute bottom-0 right-0 w-[700px] h-[700px] bg-orange-500/15 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 pointer-events-none animate-pulse" style={{ animationDuration: '10s' }}></div>
-                <div className="absolute top-1/2 left-1/2 w-[800px] h-[400px] bg-amber-400/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none transform rotate-45"></div>
+                <div className="absolute -top-[20%] -left-[10%] w-[800px] h-[800px] bg-emerald-400/20 rounded-full blur-[120px] pointer-events-none" style={{ animation: 'drift 20s infinite ease-in-out' }}></div>
+                <div className="absolute -bottom-[20%] -right-[10%] w-[600px] h-[600px] bg-amber-400/15 rounded-full blur-[100px] pointer-events-none" style={{ animation: 'drift-reverse 25s infinite ease-in-out' }}></div>
+                <div className="absolute top-[10%] left-[20%] w-[900px] h-[500px] bg-emerald-300/15 rounded-full blur-[120px] pointer-events-none" style={{ animation: 'drift 30s infinite ease-in-out' }}></div>
 
                 {/* Sidebar & Topbar Components */}
-                <OperatorSidebar 
-                    isOpen={isSidebarOpen} 
-                    onClose={() => setIsSidebarOpen(false)} 
-                    onLogout={handleLogout} 
+                <OperatorSidebar
+                    isOpen={isSidebarOpen}
+                    onClose={() => setIsSidebarOpen(false)}
+                    onLogout={handleLogout}
                 />
 
-                <OperatorTopbar 
+                <OperatorTopbar
                     onMenuClick={() => setIsSidebarOpen(true)}
-                    title="Lens QC"
+                    title="Camera Inspection"
                     subtitle="Sistem Setup Batch"
                     extraClasses="bg-white/80 backdrop-blur-md border-b border-slate-200/50 px-6 py-4"
                     rightContent={
@@ -80,7 +83,7 @@ export default function Setup({ productModels }) {
                     {/* Header Section */}
                     <div className="text-center mb-10">
                         <h2 className="text-4xl lg:text-5xl font-black text-slate-800 mb-4 tracking-tight">Pilih <span className="text-emerald-500">Part Number</span></h2>
-                        <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto">Silakan cari dan pilih part number komponen yang akan diproses pada batch inspeksi kali ini.</p>
+                        <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto">Silakan cari dan pilih part-number yang akan diproses pada inspeksi kali ini.</p>
                     </div>
 
                     {/* Search Bar Premium */}
@@ -104,7 +107,7 @@ export default function Setup({ productModels }) {
                     <div className="flex-1 bg-white/60 backdrop-blur-xl border border-slate-200/60 rounded-[2rem] shadow-xl overflow-hidden flex flex-col max-h-[60vh] relative">
                         {/* Gradient Fade Top */}
                         <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-white/90 to-transparent z-10 pointer-events-none"></div>
-                        
+
                         <div className="overflow-y-auto p-6 lg:p-8 relative z-0 custom-scrollbar">
                             {filteredParts.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -127,7 +130,7 @@ export default function Setup({ productModels }) {
                                 </div>
                             )}
                         </div>
-                        
+
                         {/* Gradient Fade Bottom */}
                         <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none rounded-b-[2rem]"></div>
                     </div>
@@ -139,8 +142,8 @@ export default function Setup({ productModels }) {
                             disabled={!selectedPartId}
                             className={`
                                 w-full max-w-2xl mx-auto py-5 px-8 rounded-full font-black text-xl flex items-center justify-center gap-3 transition-all
-                                ${selectedPartId 
-                                    ? 'bg-slate-900 text-white shadow-2xl hover:bg-slate-800 hover:-translate-y-1 hover:shadow-emerald-500/20 border border-slate-700' 
+                                ${selectedPartId
+                                    ? 'bg-slate-900 text-white shadow-2xl hover:bg-slate-800 hover:-translate-y-1 hover:shadow-emerald-500/20 border border-slate-700'
                                     : 'bg-slate-200 text-slate-400'
                                 }
                             `}
@@ -172,6 +175,18 @@ export default function Setup({ productModels }) {
                 .custom-scrollbar::-webkit-scrollbar-thumb {
                     background-color: #cbd5e1;
                     border-radius: 10px;
+                }
+                @keyframes drift {
+                    0% { transform: translate(0, 0) scale(1); }
+                    33% { transform: translate(30px, -50px) scale(1.05); }
+                    66% { transform: translate(-20px, 20px) scale(0.95); }
+                    100% { transform: translate(0, 0) scale(1); }
+                }
+                @keyframes drift-reverse {
+                    0% { transform: translate(0, 0) scale(1); }
+                    33% { transform: translate(-30px, 50px) scale(1.1); }
+                    66% { transform: translate(20px, -20px) scale(0.9); }
+                    100% { transform: translate(0, 0) scale(1); }
                 }
             `}</style>
         </>
