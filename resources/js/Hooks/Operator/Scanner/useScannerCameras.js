@@ -26,6 +26,17 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
     const [backResult, setBackResult] = useState(null);
     const [isAnalyzingBack, setIsAnalyzingBack] = useState(false);
 
+    // Handlers to persist selection
+    const handleSetFrontCameraId = useCallback((id) => {
+        setFrontCameraId(id);
+        localStorage.setItem('frontCameraId', id);
+    }, []);
+
+    const handleSetBackCameraId = useCallback((id) => {
+        setBackCameraId(id);
+        localStorage.setItem('backCameraId', id);
+    }, []);
+
     // Enumerate Devices
     useEffect(() => {
         const getDevices = async () => {
@@ -36,8 +47,20 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
                 setDevices(videoDevices);
                 
                 if (videoDevices.length > 0) {
-                    setFrontCameraId(videoDevices[0].deviceId);
-                    if (videoDevices.length > 1) {
+                    const savedFront = localStorage.getItem('frontCameraId');
+                    const savedBack = localStorage.getItem('backCameraId');
+
+                    // Set Front Camera (use saved if valid, else default to first)
+                    if (savedFront && videoDevices.find(d => d.deviceId === savedFront)) {
+                        setFrontCameraId(savedFront);
+                    } else {
+                        setFrontCameraId(videoDevices[0].deviceId);
+                    }
+
+                    // Set Back Camera (use saved if valid, else default to second if available, else first)
+                    if (savedBack && videoDevices.find(d => d.deviceId === savedBack)) {
+                        setBackCameraId(savedBack);
+                    } else if (videoDevices.length > 1) {
                         setBackCameraId(videoDevices[1].deviceId);
                     } else {
                         setBackCameraId(videoDevices[0].deviceId);
@@ -233,8 +256,8 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
 
     return {
         devices,
-        frontVideoRef, frontCanvasRef, frontCameraId, setFrontCameraId, frontStream, frontCaptured, frontResult, isAnalyzingFront, isFrontCompleted, setIsFrontCompleted, setFrontResult,
-        backVideoRef, backCanvasRef, backCameraId, setBackCameraId, backStream, backCaptured, backResult, isAnalyzingBack,
+        frontVideoRef, frontCanvasRef, frontCameraId, setFrontCameraId: handleSetFrontCameraId, frontStream, frontCaptured, frontResult, isAnalyzingFront, isFrontCompleted, setIsFrontCompleted, setFrontResult,
+        backVideoRef, backCanvasRef, backCameraId, setBackCameraId: handleSetBackCameraId, backStream, backCaptured, backResult, isAnalyzingBack,
         capturePhoto, retakePhoto, submitPhoto
     };
 }

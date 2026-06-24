@@ -5,7 +5,10 @@ import OperatorSidebar from '@/Components/Operator/Shared/OperatorSidebar';
 import OperatorTopbar from '@/Components/Operator/Shared/OperatorTopbar';
 import PartCard from '@/Components/Operator/Setup/PartCard';
 import SetupConfirmModal from '@/Components/Operator/Setup/SetupConfirmModal';
+import AnnouncementBanner from '@/Components/Operator/Shared/AnnouncementBanner';
+import AlertModal from '@/Components/Operator/Shared/AlertModal';
 import useSetupParts from '@/Hooks/Operator/Setup/useSetupParts';
+import useAnnouncements from '@/Hooks/Operator/Shared/useAnnouncements';
 
 export default function Setup({ productModels }) {
     const {
@@ -28,7 +31,7 @@ export default function Setup({ productModels }) {
 
     const confirmStart = () => {
         if (selectedPartId) {
-            localStorage.setItem('last_part_id', selectedPartId);
+            localStorage.setItem('activeScannerPartId', selectedPartId);
             router.get(route('operator.scanner', { part_id: selectedPartId }));
         }
     };
@@ -36,6 +39,8 @@ export default function Setup({ productModels }) {
     const handleLogout = () => {
         router.post('/logout');
     };
+
+    const { activeBroadcasts, activeAlerts, dismissAnnouncement } = useAnnouncements();
 
     return (
         <>
@@ -68,10 +73,13 @@ export default function Setup({ productModels }) {
                     }
                 />
 
+                <AnnouncementBanner announcements={activeBroadcasts} onDismiss={dismissAnnouncement} />
+                <AlertModal alerts={activeAlerts} onDismiss={dismissAnnouncement} />
+
                 <main className="flex-1 flex flex-col max-w-5xl w-full mx-auto p-6 md:p-8 lg:p-12 z-10 relative">
                     {/* Header Section */}
                     <div className="text-center mb-10">
-                        <h2 className="text-4xl lg:text-5xl font-black text-slate-800 mb-4 tracking-tight">Persiapan <span className="text-emerald-500">Inspeksi</span></h2>
+                        <h2 className="text-4xl lg:text-5xl font-black text-slate-800 mb-4 tracking-tight">Pilih <span className="text-emerald-500">Part Number</span></h2>
                         <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto">Silakan cari dan pilih part number komponen yang akan diproses pada batch inspeksi kali ini.</p>
                     </div>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
-import { X, User, LogOut, Box, History } from 'lucide-react';
+import { X, User, LogOut, Box, History, LayoutDashboard } from 'lucide-react';
 
 export default function OperatorSidebar({ isOpen, onClose, onLogout, onSetupClick, onHistoryClick, children }) {
     return (
@@ -30,6 +30,14 @@ export default function OperatorSidebar({ isOpen, onClose, onLogout, onSetupClic
                 <div className="flex-1 py-6 px-4 flex flex-col gap-2">
                     {/* Slot for custom priority buttons like "Lanjutkan Kamera" */}
                     {children}
+
+                    <Link 
+                        href={route('operator.dashboard')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-colors ${route().current('operator.dashboard') ? 'bg-emerald-50 text-emerald-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <LayoutDashboard className="w-5 h-5" />
+                        Dashboard Kinerja
+                    </Link>
 
                     {onSetupClick ? (
                         <button 

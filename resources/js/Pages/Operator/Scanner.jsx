@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
 import axios from 'axios';
-import { CheckCircle2, XCircle, Camera, Send, AlertTriangle, Settings2, LogOut, Activity, Focus, Video, Menu, X, User, RefreshCcw } from 'lucide-react';
+import { CheckCircle2, XCircle, Camera, Send, AlertTriangle, LogOut, Activity, Focus, Video, Menu, X, User, RefreshCcw } from 'lucide-react';
 import OperatorSidebar from '@/Components/Operator/Shared/OperatorSidebar';
 import OperatorTopbar from '@/Components/Operator/Shared/OperatorTopbar';
 import CameraPanel from '@/Components/Operator/Scanner/CameraPanel';
 import ConfirmModal from '@/Components/Operator/Shared/ConfirmModal';
 import AiOfflineModal from '@/Components/Operator/Scanner/AiOfflineModal';
+import AnnouncementBanner from '@/Components/Operator/Shared/AnnouncementBanner';
+import AlertModal from '@/Components/Operator/Shared/AlertModal';
+import useAnnouncements from '@/Hooks/Operator/Shared/useAnnouncements';
 import useScannerCameras from '@/Hooks/Operator/Scanner/useScannerCameras';
 
 export default function Scanner() {
@@ -21,12 +24,21 @@ export default function Scanner() {
     const [aiOffline, setAiOffline] = useState(false);
     const [currentTime, setCurrentTime] = useState('');
 
+    const { activeBroadcasts, activeAlerts, dismissAnnouncement } = useAnnouncements();
+
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentTime(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
         }, 1000);
         return () => clearInterval(timer);
     }, []);
+
+    // Simpan part_id aktif ke localStorage agar bisa diakses dari halaman lain (Dashboard, History)
+    useEffect(() => {
+        if (part?.id) {
+            localStorage.setItem('activeScannerPartId', String(part.id));
+        }
+    }, [part?.id]);
 
 
     const {
@@ -85,9 +97,10 @@ export default function Scanner() {
                                     setPendingNav(route('operator.setup'));
                                     setIsConfirmOpen(true);
                                 }}
-                                className="text-sm font-black text-red-600 hover:text-white bg-red-50 hover:bg-red-600 border border-red-200 hover:border-transparent px-5 py-2 rounded-xl transition-all shadow-sm hover:shadow-red-500/30 uppercase tracking-wide"
+                                className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl font-bold transition-all border border-red-100 shadow-sm"
                             >
-                                Selesaikan Batch
+                                <LogOut className="w-5 h-5" />
+                                <span className="hidden sm:inline">Akhiri Sesi</span>
                             </button>
                         </>
                     }
@@ -119,17 +132,21 @@ export default function Scanner() {
                     onClose={() => setAiOffline(false)} 
                 />
 
+                <AlertModal alerts={activeAlerts} onDismiss={dismissAnnouncement} />
+
                 <ConfirmModal 
                     isOpen={isConfirmOpen} 
                     onClose={() => setIsConfirmOpen(false)}
                     onConfirm={() => {
-                        localStorage.removeItem('last_part_id');
+                        localStorage.removeItem('activeScannerPartId');
+                        localStorage.removeItem('last_part_id'); // Bersihkan yang lama juga jika ada
                         router.get(pendingNav || route('operator.setup'));
                     }}
                     message="Sesi inspeksi ini akan diakhiri jika Anda kembali ke halaman Persiapan Inspeksi. Lanjutkan?"
                 />
 
                 {/* Konten Utama - 50/50 Grid Layout: DEPAN dan BELAKANG */}
+                <AnnouncementBanner announcements={activeBroadcasts} onDismiss={dismissAnnouncement} />
                 <main className="flex-1 w-full mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
                     
                     {/* PANEL DEPAN */}

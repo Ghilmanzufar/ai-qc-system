@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\AnnouncementController;
 
 // ==========================================
 // AUTH ROUTES (Guest Only)
@@ -26,7 +27,7 @@ Route::get('/', function () {
     return match ($user->role) {
         'admin' => redirect()->route('admin.dashboard'),
         'supervisor' => redirect()->route('supervisor.dashboard'),
-        'operator' => redirect()->route('operator.setup'),
+        'operator' => redirect()->route('operator.dashboard'),
         default => redirect()->route('login'),
     };
 })->middleware('auth');
@@ -64,8 +65,13 @@ Route::middleware(['auth', 'role:supervisor,admin'])->prefix('supervisor')->name
 // OPERATOR ROUTES
 // ==========================================
 Route::middleware(['auth', 'role:operator,admin'])->prefix('operator')->name('operator.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'operatorDashboard'])->name('dashboard');
     Route::get('/setup', [InspectionController::class, 'setup'])->name('setup');
     Route::get('/scanner', [InspectionController::class, 'scanner'])->name('scanner');
     Route::post('/analyze', [InspectionController::class, 'analyze'])->name('analyze');
     Route::get('/history', [InspectionController::class, 'history'])->name('history');
+
+    // Announcement routes
+    Route::get('/announcements/active', [AnnouncementController::class, 'active'])->name('announcements.active');
+    Route::post('/announcements/{id}/read', [AnnouncementController::class, 'markRead'])->name('announcements.read');
 });

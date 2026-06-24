@@ -27,6 +27,46 @@ class DashboardController extends Controller
     }
 
     /**
+     * Dashboard Operator — Personal Performance
+     */
+    public function operatorDashboard()
+    {
+        $userId = auth()->id();
+        $today = today()->toDateString();
+
+        $inspectionsToday = Inspection::with(['part.product_model'])
+            ->where('user_id', $userId)
+            ->whereDate('created_at', $today)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $total = $inspectionsToday->count();
+        $pass = $inspectionsToday->where('final_decision', 'PASS')->count();
+        $ng = $inspectionsToday->where('final_decision', 'NG')->count();
+
+        // Avoid division by zero
+        $yieldRate = $total > 0 ? round(($pass / $total) * 100, 1) : 0;
+        
+        // Asumsi target personal 500 pcs per hari
+        $target = 500;
+        $targetAchievement = round(($total / $target) * 100, 1);
+
+        $recentActivity = $inspectionsToday->take(5);
+
+        return Inertia::render('Operator/Dashboard', [
+            'stats' => [
+                'total' => $total,
+                'pass' => $pass,
+                'ng' => $ng,
+                'yield_rate' => $yieldRate,
+                'target' => $target,
+                'target_achievement' => $targetAchievement > 100 ? 100 : $targetAchievement,
+            ],
+            'recentActivity' => $recentActivity,
+        ]);
+    }
+
+    /**
      * Dashboard Supervisor — Live Monitoring + Analytics.
      */
     public function supervisorDashboard()
