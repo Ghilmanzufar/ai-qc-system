@@ -67,5 +67,5 @@ Route::middleware(['auth', 'role:operator,admin'])->prefix('operator')->name('op
     Route::get('/setup', [InspectionController::class, 'setup'])->name('setup');
     Route::get('/scanner', [InspectionController::class, 'scanner'])->name('scanner');
     Route::post('/analyze', [InspectionController::class, 'analyze'])->name('analyze');
-    Route::get('/history', [InspectionController::class, 'todayHistory'])->name('history');
+    Route::get('/history', [InspectionController::class, 'history'])->name('history');
 });

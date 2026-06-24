@@ -144,15 +144,16 @@ class InspectionController extends Controller
     /**
      * Ambil riwayat inspeksi hari ini untuk operator.
      */
-    public function todayHistory()
+    public function history()
     {
-        $inspections = Inspection::with('part')
+        $inspections = Inspection::with(['part.productModel'])
             ->where('user_id', Auth::id())
             ->whereDate('created_at', today())
             ->latest()
-            ->take(50)
             ->get();
 
-        return response()->json($inspections);
+        return Inertia::render('Operator/History', [
+            'inspections' => $inspections,
+        ]);
     }
 }
