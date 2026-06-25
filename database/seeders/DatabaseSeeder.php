@@ -18,21 +18,21 @@ class DatabaseSeeder extends Seeder
         // 1. Create Users (Admin, Supervisor, Operator)
         User::create([
             'name' => 'Admin Utama',
-            'email' => 'admin@aiqc.com',
+            'email' => 'admin@aipec.com',
             'password' => Hash::make('password'),
             'role' => 'admin',
         ]);
 
         User::create([
             'name' => 'Pak Supervisor',
-            'email' => 'supervisor@aiqc.com',
+            'email' => 'supervisor@aipec.com',
             'password' => Hash::make('password'),
             'role' => 'supervisor',
         ]);
 
         User::create([
             'name' => 'Member Line 1',
-            'email' => 'member1@aiqc.com',
+            'email' => 'member1@aipec.com',
             'password' => Hash::make('password'),
             'role' => 'member',
         ]);

@@ -5,7 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
-const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'AI QC System';
+const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'AI PEC System';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

@@ -28,7 +28,7 @@ export default function Dashboard() {
 
             <div className="mb-8">
                 <h1 className="text-3xl font-black text-slate-800 tracking-tight">Overview Hari Ini</h1>
-                <p className="text-slate-500 mt-1 font-medium">Pantauan real-time aktivitas inspeksi AI QC di seluruh lini produksi.</p>
+                <p className="text-slate-500 mt-1 font-medium">Pantauan real-time aktivitas inspeksi AI PEC di seluruh lini produksi.</p>
             </div>
 
             {/* Top Stats Grid */}

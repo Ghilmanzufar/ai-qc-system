@@ -24,7 +24,7 @@ window.resetInspection = function() {
         inputPart.placeholder = "Pilih Model terlebih dahulu...";
     }
     if(partList) partList.innerHTML = "";
-    if(topbarTitle) topbarTitle.innerHTML = "AI QC System";
+    if(topbarTitle) topbarTitle.innerHTML = "AI PEC System";
 };
 
 document.addEventListener("DOMContentLoaded", function() {
