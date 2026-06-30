@@ -7,34 +7,19 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
     // Camera Devices
     const [devices, setDevices] = useState([]);
     
-    // --- FRONT SIDE STATE ---
-    const frontVideoRef = useRef(null);
-    const frontCanvasRef = useRef(null);
-    const [frontCameraId, setFrontCameraId] = useState('');
-    const [frontStream, setFrontStream] = useState(null);
-    const [frontCaptured, setFrontCaptured] = useState(null);
-    const [frontResult, setFrontResult] = useState(null);
-    const [isAnalyzingFront, setIsAnalyzingFront] = useState(false);
-    const [isFrontCompleted, setIsFrontCompleted] = useState(false);
-
-    // --- BACK SIDE STATE ---
-    const backVideoRef = useRef(null);
-    const backCanvasRef = useRef(null);
-    const [backCameraId, setBackCameraId] = useState('');
-    const [backStream, setBackStream] = useState(null);
-    const [backCaptured, setBackCaptured] = useState(null);
-    const [backResult, setBackResult] = useState(null);
-    const [isAnalyzingBack, setIsAnalyzingBack] = useState(false);
+    // --- CAMERA STATE ---
+    const videoRef = useRef(null);
+    const canvasRef = useRef(null);
+    const [cameraId, setCameraId] = useState('');
+    const [stream, setStream] = useState(null);
+    const [captured, setCaptured] = useState(null);
+    const [result, setResult] = useState(null);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     // Handlers to persist selection
-    const handleSetFrontCameraId = useCallback((id) => {
-        setFrontCameraId(id);
+    const handleSetCameraId = useCallback((id) => {
+        setCameraId(id);
         localStorage.setItem('frontCameraId', id);
-    }, []);
-
-    const handleSetBackCameraId = useCallback((id) => {
-        setBackCameraId(id);
-        localStorage.setItem('backCameraId', id);
     }, []);
 
     // Enumerate Devices
@@ -47,23 +32,13 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
                 setDevices(videoDevices);
                 
                 if (videoDevices.length > 0) {
-                    const savedFront = localStorage.getItem('frontCameraId');
-                    const savedBack = localStorage.getItem('backCameraId');
+                    const savedCamera = localStorage.getItem('frontCameraId');
 
-                    // Set Front Camera (use saved if valid, else default to first)
-                    if (savedFront && videoDevices.find(d => d.deviceId === savedFront)) {
-                        setFrontCameraId(savedFront);
+                    // Set Camera (use saved if valid, else default to first)
+                    if (savedCamera && videoDevices.find(d => d.deviceId === savedCamera)) {
+                        setCameraId(savedCamera);
                     } else {
-                        setFrontCameraId(videoDevices[0].deviceId);
-                    }
-
-                    // Set Back Camera (use saved if valid, else default to second if available, else first)
-                    if (savedBack && videoDevices.find(d => d.deviceId === savedBack)) {
-                        setBackCameraId(savedBack);
-                    } else if (videoDevices.length > 1) {
-                        setBackCameraId(videoDevices[1].deviceId);
-                    } else {
-                        setBackCameraId(videoDevices[0].deviceId);
+                        setCameraId(videoDevices[0].deviceId);
                     }
                 }
             } catch (err) {
@@ -73,131 +48,63 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
         getDevices();
     }, []);
 
-    // Start Front Camera
+    // Start Camera
     useEffect(() => {
-        const startFrontCamera = async () => {
-            if (frontStream) frontStream.getTracks().forEach(t => t.stop());
-            if (!frontCameraId) return;
+        const startCamera = async () => {
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            if (!cameraId) return;
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: frontCameraId }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+                const newStream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: { exact: cameraId }, width: { ideal: 1920 }, height: { ideal: 1080 } }
                 });
-                setFrontStream(stream);
-                if (frontVideoRef.current) frontVideoRef.current.srcObject = stream;
+                setStream(newStream);
+                if (videoRef.current) videoRef.current.srcObject = newStream;
             } catch (err) {
-                console.error("Front camera error:", err);
+                console.error("Camera error:", err);
             }
         };
-        startFrontCamera();
-        return () => { if (frontStream) frontStream.getTracks().forEach(t => t.stop()); };
-    }, [frontCameraId]);
+        startCamera();
+        return () => { if (stream) stream.getTracks().forEach(t => t.stop()); };
+    }, [cameraId]);
 
-    // Start Back Camera
-    useEffect(() => {
-        let currentStream = null;
-        
-        const startBackCamera = async () => {
-            if (!backCameraId || !isFrontCompleted) {
-                setBackStream(null);
-                return;
-            }
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: backCameraId }, width: { ideal: 1920 }, height: { ideal: 1080 } }
-                });
-                currentStream = stream;
-                setBackStream(stream);
-                if (backVideoRef.current) backVideoRef.current.srcObject = stream;
-            } catch (err) {
-                console.error("Back camera error:", err);
-            }
-        };
-        
-        startBackCamera();
-        
-        return () => {
-            if (currentStream) {
-                currentStream.getTracks().forEach(t => t.stop());
-            }
-        };
-    }, [backCameraId, isFrontCompleted]);
+    // Auto dismiss results from the overlay (tapi tetap ada di state agar tampil di ResultPanel)
+    // Sebenarnya jika kita membiarkan result ada di state, overlay di CameraPanel akan terus menutupi.
+    // Solusinya: Kita bisa clear 'captured' dan mematikan overlay setelah beberapa saat, ATAU
+    // kita hapus fitur auto-dismiss dan user harus pencet "Lanjutkan" untuk clear kamera, sementara di ResultPanel selalu tampil.
+    // Mari kita biarkan user pencet "Lanjutkan" untuk memotret lagi.
 
-    // Audio Feedback removed (moved to Utils/audio.js)
-
-    // Auto dismiss results
-    useEffect(() => {
-        if (frontResult && frontResult.status === 'OK') {
-            const timer = setTimeout(() => {
-                setFrontResult(null);
-                setIsFrontCompleted(true);
-            }, 1500);
-            return () => clearTimeout(timer);
-        }
-    }, [frontResult]);
-
-    useEffect(() => {
-        if (backResult && backResult.status === 'NG') {
-            const timer = setTimeout(() => {
-                setBackResult(null);
-                setIsFrontCompleted(false); // Reset session
-            }, 3000);
-            return () => clearTimeout(timer);
-        } else if (backResult && backResult.status === 'OK') {
-            const timer = setTimeout(() => {
-                setBackResult(null);
-                setIsFrontCompleted(false); // Reset session
-            }, 1500);
-            return () => clearTimeout(timer);
-        }
-    }, [backResult]);
-
-    const capturePhoto = useCallback((side) => {
+    const capturePhoto = useCallback(() => {
         if (!part) return;
         
-        if (side === 'front' && frontVideoRef.current && frontCanvasRef.current) {
-            const video = frontVideoRef.current;
-            const canvas = frontCanvasRef.current;
+        if (videoRef.current && canvasRef.current) {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            setFrontCaptured(canvas.toDataURL('image/jpeg', 0.9));
-        } else if (side === 'back' && backVideoRef.current && backCanvasRef.current) {
-            const video = backVideoRef.current;
-            const canvas = backCanvasRef.current;
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            setBackCaptured(canvas.toDataURL('image/jpeg', 0.9));
+            setCaptured(canvas.toDataURL('image/jpeg', 0.9));
         }
     }, [part]);
 
-    const retakePhoto = useCallback((side) => {
-        if (side === 'front') {
-            setFrontCaptured(null);
-            setFrontResult(null);
-            setIsFrontCompleted(false);
-        } else {
-            setBackCaptured(null);
-            setBackResult(null);
-        }
+    const retakePhoto = useCallback(() => {
+        setCaptured(null);
+        setResult(null);
     }, []);
 
-    const submitPhoto = useCallback(async (side) => {
-        const image = side === 'front' ? frontCaptured : backCaptured;
+    const submitPhoto = useCallback(async () => {
+        const image = captured;
         if (!image || !part) return;
 
-        if (side === 'front') { setIsAnalyzingFront(true); setFrontResult(null); }
-        else { setIsAnalyzingBack(true); setBackResult(null); }
-        
+        setIsAnalyzing(true); 
+        setResult(null);
         setAiOffline(false);
 
         try {
-            const response = await axios.post('/operator/analyze', {
+            const response = await axios.post('/member/analyze', {
                 part_id: part.id,
                 image: image,
-                side: side
+                side: 'front' // Tetap kirim 'front' agar backend tidak bingung
             });
 
             const resData = response.data;
@@ -205,12 +112,13 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
                 const resObj = {
                     status: resData.status,
                     defect_type: resData.defect_type,
-                    confidence: resData.confidence
+                    class_details: resData.class_details,
+                    object_count: resData.object_count,
+                    confidence: resData.confidence,
+                    annotated_image: resData.annotated_image
                 };
                 
-                if (side === 'front') setFrontResult(resObj);
-                else setBackResult(resObj);
-                
+                setResult(resObj);
                 playBeep(resData.status);
 
                 setStats(prev => ({
@@ -219,8 +127,8 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
                     ng: resData.status === 'NG' ? prev.ng + 1 : prev.ng
                 }));
                 
-                if (side === 'front') setFrontCaptured(null);
-                else setBackCaptured(null);
+                // Jangan reset setCaptured(null) agar user masih bisa lihat foto yang terakhir di inspeksi (opsional)
+                // Atau biarkan mereka harus tekan "Lanjutkan" untuk clear
             }
         } catch (error) {
             console.error("Analyze error:", error);
@@ -230,34 +138,31 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
                 alert(error.response?.data?.message || 'Terjadi kesalahan sistem.');
             }
             playBeep('NG');
-            if (side === 'front') setFrontCaptured(null);
-            else setBackCaptured(null);
+            setCaptured(null);
         } finally {
-            if (side === 'front') setIsAnalyzingFront(false);
-            else setIsAnalyzingBack(false);
+            setIsAnalyzing(false);
         }
-    }, [part, frontCaptured, backCaptured, setStats, setAiOffline]);
+    }, [part, captured, setStats, setAiOffline]);
 
     // Keyboard Shortcuts (Orchestrated by external hook)
     useScannerKeyboard({
         part, 
         isConfirmOpen, 
-        isFrontCompleted, 
-        frontCaptured, 
-        backCaptured, 
-        isAnalyzingFront, 
-        isAnalyzingBack, 
-        frontResult, 
-        backResult,
-        capturePhoto, 
-        submitPhoto, 
-        retakePhoto
+        isFrontCompleted: false, // Not used anymore
+        frontCaptured: captured, 
+        backCaptured: null, 
+        isAnalyzingFront: isAnalyzing, 
+        isAnalyzingBack: false, 
+        frontResult: result, 
+        backResult: null,
+        capturePhoto: () => capturePhoto(), 
+        submitPhoto: () => submitPhoto(), 
+        retakePhoto: () => retakePhoto()
     });
 
     return {
         devices,
-        frontVideoRef, frontCanvasRef, frontCameraId, setFrontCameraId: handleSetFrontCameraId, frontStream, frontCaptured, frontResult, isAnalyzingFront, isFrontCompleted, setIsFrontCompleted, setFrontResult,
-        backVideoRef, backCanvasRef, backCameraId, setBackCameraId: handleSetBackCameraId, backStream, backCaptured, backResult, isAnalyzingBack,
+        videoRef, canvasRef, cameraId, setCameraId: handleSetCameraId, stream, captured, setCaptured, result, setResult, isAnalyzing,
         capturePhoto, retakePhoto, submitPhoto
     };
 }

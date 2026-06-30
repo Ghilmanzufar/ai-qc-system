@@ -98,9 +98,13 @@ class InspectionController extends Controller
 
             if ($response->successful()) {
                 $result = $response->json();
-                $status = $result['status'] ?? 'NG'; // 'OK' atau 'NG'
-                $defectType = $result['defect_type'] ?? null;
+                // Map status dari AI server ke nilai yang diterima database (OK/NG)
+                $aiResult = $result['result'] ?? 'NG'; 
+                $status = in_array(strtoupper($aiResult), ['OK', 'PASS', 'SUCCESS']) ? 'OK' : 'NG';
+                $objectCount = $result['object_count'] ?? 0;
+                $details = $result['details'] ?? null;
                 $confidence = $result['confidence'] ?? 0;
+                $annotatedImage = $result['annotated_image'] ?? null;
             } else {
                 Log::error('AI Server returned error', ['status' => $response->status(), 'body' => $response->body()]);
                 return response()->json([
@@ -127,17 +131,20 @@ class InspectionController extends Controller
             'part_id' => $part->id,
             'user_id' => Auth::id(),
             $statusColumn => $status,
-            'final_decision' => $status === 'OK' ? 'PASS' : 'NG',
-            'defect_type' => $defectType,
+            'final_decision' => in_array($status, ['OK', 'PASS', 'SUCCESS']) ? 'PASS' : 'NG',
+            'defect_type' => $details, // simpan detail (e.g. Mendeteksi 5 objek)
             $imageColumn => 'storage/' . $imageName,
         ]);
 
         return response()->json([
             'success' => true,
             'status' => $status,
-            'defect_type' => $defectType,
+            'defect_type' => $details,
+            'object_count' => $objectCount,
+            'class_details' => $response->json('class_details'),
             'confidence' => $confidence,
             'inspection_id' => $inspection->id,
+            'annotated_image' => $annotatedImage,
         ]);
     }
 

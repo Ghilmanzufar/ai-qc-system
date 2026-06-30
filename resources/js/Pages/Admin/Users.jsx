@@ -253,7 +253,7 @@ export default function Users() {
             </div>
 
             {/* Modal */}
-            <UserModal isOpen={modalOpen} onClose={() => setModalOpen(false)} editUser={editUser} />
+            {modalOpen && <UserModal isOpen={modalOpen} onClose={() => setModalOpen(false)} editUser={editUser} />}
         </AdminLayout>
     );
 }

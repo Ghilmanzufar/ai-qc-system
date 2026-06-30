@@ -128,10 +128,20 @@ class AdminController extends Controller
             'product_model_id' => 'required|exists:product_models,id',
             'part_no' => 'required|string|max:255',
             'part_name' => 'required|string|max:255',
-            'ai_model_file' => 'nullable|string|max:255',
+            'ai_model_file' => 'nullable|file',
         ]);
 
-        Part::create($request->only('product_model_id', 'part_no', 'part_name', 'ai_model_file'));
+        $data = $request->only('product_model_id', 'part_no', 'part_name');
+
+        if ($request->hasFile('ai_model_file')) {
+            $file = $request->file('ai_model_file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            // Simpan ke disk public agar tersimpan di storage/app/public/models
+            $file->storeAs('models', $filename, 'public');
+            $data['ai_model_file'] = $filename;
+        }
+
+        Part::create($data);
 
         return redirect()->back()->with('success', 'Part berhasil ditambahkan.');
     }
@@ -144,10 +154,29 @@ class AdminController extends Controller
         $request->validate([
             'part_no' => 'required|string|max:255',
             'part_name' => 'required|string|max:255',
-            'ai_model_file' => 'nullable|string|max:255',
+            'ai_model_file' => 'nullable|file',
         ]);
 
-        $part->update($request->only('part_no', 'part_name', 'ai_model_file'));
+        $data = $request->only('part_no', 'part_name');
+
+        \Illuminate\Support\Facades\Log::info('Update Part Payload:', $request->all());
+        \Illuminate\Support\Facades\Log::info('Has File ai_model_file?', ['has_file' => $request->hasFile('ai_model_file')]);
+
+        if ($request->hasFile('ai_model_file')) {
+            $file = $request->file('ai_model_file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            \Illuminate\Support\Facades\Log::info('File received:', ['filename' => $filename]);
+            // Simpan ke disk public agar tersimpan di storage/app/public/models
+            $file->storeAs('models', $filename, 'public');
+            $data['ai_model_file'] = $filename;
+
+            // Hapus file lama jika ada
+            if ($part->ai_model_file) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete('models/' . $part->ai_model_file);
+            }
+        }
+
+        $part->update($data);
 
         return redirect()->back()->with('success', 'Part berhasil diperbarui.');
     }
@@ -157,6 +186,11 @@ class AdminController extends Controller
      */
     public function deletePart(Part $part)
     {
+        // Hapus file dari storage
+        if ($part->ai_model_file) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete('models/' . $part->ai_model_file);
+        }
+        
         $part->delete();
         return redirect()->back()->with('success', 'Part berhasil dihapus.');
     }

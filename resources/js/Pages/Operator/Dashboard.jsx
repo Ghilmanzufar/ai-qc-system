@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { Clock, Sparkles, Camera } from 'lucide-react';
 import OperatorSidebar from '@/Components/Operator/Shared/OperatorSidebar';
@@ -8,10 +8,12 @@ import YieldRateGauge from '@/Components/Operator/Dashboard/YieldRateGauge';
 import RecentActivityList from '@/Components/Operator/Dashboard/RecentActivityList';
 import AnnouncementBanner from '@/Components/Operator/Shared/AnnouncementBanner';
 import AlertModal from '@/Components/Operator/Shared/AlertModal';
+import ConfirmModal from '@/Components/Operator/Shared/ConfirmModal';
 import useDashboard from '@/Hooks/Operator/Dashboard/useDashboard';
 import useAnnouncements from '@/Hooks/Operator/Shared/useAnnouncements';
 
 export default function Dashboard({ stats, recentActivity, auth }) {
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const { 
         isSidebarOpen, 
         setIsSidebarOpen, 
@@ -34,10 +36,25 @@ export default function Dashboard({ stats, recentActivity, auth }) {
             <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-blue-400/20 rounded-full blur-[120px] pointer-events-none animate-pulse" style={{ animationDuration: '8s' }}></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-emerald-400/15 rounded-full blur-[120px] pointer-events-none animate-pulse" style={{ animationDuration: '10s' }}></div>
 
+            <ConfirmModal 
+                isOpen={isConfirmOpen} 
+                onClose={() => setIsConfirmOpen(false)}
+                onConfirm={() => {
+                    localStorage.removeItem('activeScannerPartId');
+                    localStorage.removeItem('last_part_id');
+                    router.get(route('operator.setup'));
+                }}
+                message="Sesi inspeksi ini akan diakhiri jika Anda kembali ke halaman Persiapan Inspeksi. Lanjutkan?"
+            />
+
             <OperatorSidebar 
                 isOpen={isSidebarOpen} 
                 onClose={() => setIsSidebarOpen(false)} 
                 onLogout={handleLogout}
+                onSetupClick={lastPartId ? () => {
+                    setIsSidebarOpen(false);
+                    setIsConfirmOpen(true);
+                } : undefined}
             >
                 {lastPartId && (
                     <button

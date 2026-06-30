@@ -81,7 +81,7 @@ class DashboardController extends Controller
         $userId = auth()->id();
         $today = today()->toDateString();
 
-        $inspectionsToday = Inspection::with(['part.product_model'])
+        $inspectionsToday = Inspection::with(['part.productModel'])
             ->where('user_id', $userId)
             ->whereDate('created_at', $today)
             ->orderBy('created_at', 'desc')

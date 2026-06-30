@@ -12,6 +12,8 @@ import AlertModal from '@/Components/Operator/Shared/AlertModal';
 import useAnnouncements from '@/Hooks/Operator/Shared/useAnnouncements';
 import useScannerCameras from '@/Hooks/Operator/Scanner/useScannerCameras';
 
+import ResultPanel from '@/Components/Operator/Scanner/ResultPanel';
+
 export default function Scanner() {
     const { part, dailyStats: initialStats, auth } = usePage().props;
     
@@ -40,11 +42,9 @@ export default function Scanner() {
         }
     }, [part?.id]);
 
-
     const {
         devices,
-        frontVideoRef, frontCanvasRef, frontCameraId, setFrontCameraId, frontStream, frontCaptured, frontResult, isAnalyzingFront, isFrontCompleted, setIsFrontCompleted, setFrontResult,
-        backVideoRef, backCanvasRef, backCameraId, setBackCameraId, backStream, backCaptured, backResult, isAnalyzingBack,
+        videoRef, canvasRef, cameraId, setCameraId, stream, captured, setCaptured, result, setResult, isAnalyzing,
         capturePhoto, retakePhoto, submitPhoto
     } = useScannerCameras(part, setStats, setAiOffline, isConfirmOpen);
 
@@ -52,15 +52,12 @@ export default function Scanner() {
         router.post('/logout');
     };
 
-    // Removed renderCameraPanel function, moved to CameraPanel.jsx component
-
     return (
         <>
             <Head title="Live Scanner" />
             
             {/* Hidden Canvas for capturing */}
-            <canvas ref={frontCanvasRef} className="hidden" />
-            <canvas ref={backCanvasRef} className="hidden" />
+            <canvas ref={canvasRef} className="hidden" />
 
             <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
                 
@@ -68,13 +65,27 @@ export default function Scanner() {
                 <OperatorSidebar 
                     isOpen={isSidebarOpen} 
                     onClose={() => setIsSidebarOpen(false)} 
-                    onLogout={handleLogout}
+                    onLogout={() => {
+                        if (isAnalyzing) {
+                            alert("Harap tunggu, proses analisis AI sedang berjalan!");
+                            return;
+                        }
+                        handleLogout();
+                    }}
                     onSetupClick={() => {
+                        if (isAnalyzing) {
+                            alert("Harap tunggu, proses analisis AI sedang berjalan!");
+                            return;
+                        }
                         setIsSidebarOpen(false);
                         setPendingNav(route('operator.setup'));
                         setIsConfirmOpen(true);
                     }}
                     onHistoryClick={() => {
+                        if (isAnalyzing) {
+                            alert("Harap tunggu, proses analisis AI sedang berjalan!");
+                            return;
+                        }
                         setIsSidebarOpen(false);
                         router.get(route('operator.history'));
                     }}
@@ -94,6 +105,10 @@ export default function Scanner() {
                             </div>
                             <button 
                                 onClick={() => {
+                                    if (isAnalyzing) {
+                                        alert("Harap tunggu, proses analisis AI sedang berjalan!");
+                                        return;
+                                    }
                                     setPendingNav(route('operator.setup'));
                                     setIsConfirmOpen(true);
                                 }}
@@ -145,53 +160,42 @@ export default function Scanner() {
                     message="Sesi inspeksi ini akan diakhiri jika Anda kembali ke halaman Persiapan Inspeksi. Lanjutkan?"
                 />
 
-                {/* Konten Utama - 50/50 Grid Layout: DEPAN dan BELAKANG */}
+                {/* Konten Utama - Grid Layout */}
                 <AnnouncementBanner announcements={activeBroadcasts} onDismiss={dismissAnnouncement} />
-                <main className="flex-1 w-full mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+                <main className="flex-1 w-full mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-10 gap-6 items-stretch">
                     
-                    {/* PANEL DEPAN */}
-                    <CameraPanel
-                        side="front"
-                        title="SISI DEPAN"
-                        stream={frontStream}
-                        videoRef={frontVideoRef}
-                        cameraId={frontCameraId}
-                        setCameraId={setFrontCameraId}
-                        devices={devices}
-                        captured={frontCaptured}
-                        result={frontResult}
-                        isAnalyzing={isAnalyzingFront}
-                        part={part}
-                        onCapture={capturePhoto}
-                        onRetake={retakePhoto}
-                        onSubmit={(side, forceContinue = false) => {
-                            if (forceContinue) {
-                                setFrontResult(null);
-                                setIsFrontCompleted(true);
-                            } else {
-                                submitPhoto(side);
-                            }
-                        }}
-                    />
+                    {/* PANEL KAMERA (70%) */}
+                    <div className="lg:col-span-7 flex flex-col">
+                        <CameraPanel
+                            side="front"
+                            title="KAMERA INSPEKSI"
+                            stream={stream}
+                            videoRef={videoRef}
+                            cameraId={cameraId}
+                            setCameraId={setCameraId}
+                            devices={devices}
+                            captured={captured}
+                            result={result}
+                            isAnalyzing={isAnalyzing}
+                            part={part}
+                            onCapture={capturePhoto}
+                            onRetake={retakePhoto}
+                            onUpload={(dataUrl) => setCaptured(dataUrl)}
+                            onSubmit={(side, forceContinue = false) => {
+                                if (forceContinue) {
+                                    setResult(null);
+                                    setCaptured(null); // Clear image to start next capture
+                                } else {
+                                    submitPhoto();
+                                }
+                            }}
+                        />
+                    </div>
 
-                    {/* PANEL BELAKANG */}
-                    <CameraPanel
-                        side="back"
-                        title="SISI BELAKANG"
-                        stream={backStream}
-                        videoRef={backVideoRef}
-                        cameraId={backCameraId}
-                        setCameraId={setBackCameraId}
-                        devices={devices}
-                        captured={backCaptured}
-                        result={backResult}
-                        isAnalyzing={isAnalyzingBack}
-                        isFrontCompleted={isFrontCompleted}
-                        part={part}
-                        onCapture={capturePhoto}
-                        onRetake={retakePhoto}
-                        onSubmit={(side) => submitPhoto(side)}
-                    />
+                    {/* PANEL HASIL INSPEKSI (30%) */}
+                    <div className="lg:col-span-3 flex flex-col">
+                        <ResultPanel result={result} part={part} />
+                    </div>
 
                 </main>
             </div>

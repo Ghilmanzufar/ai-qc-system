@@ -43,16 +43,17 @@ function ModelModal({ isOpen, onClose }) {
 }
 
 function PartModal({ isOpen, onClose, modelId, editPart }) {
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         product_model_id: modelId || editPart?.product_model_id || '',
         part_no: editPart?.part_no || '',
         part_name: editPart?.part_name || '',
-        ai_model_file: editPart?.ai_model_file || '',
+        ai_model_file: null, // ubah menjadi null karena file
+        _method: editPart ? 'put' : 'post', // trik laravel untuk update form data
     });
     const handleSubmit = (e) => {
         e.preventDefault();
         if (editPart) {
-            put(`/admin/parts/${editPart.id}`, { onSuccess: () => { onClose(); reset(); } });
+            post(`/admin/parts/${editPart.id}`, { onSuccess: () => { onClose(); reset(); } });
         } else {
             post('/admin/parts', { onSuccess: () => { onClose(); reset(); } });
         }
@@ -88,9 +89,13 @@ function PartModal({ isOpen, onClose, modelId, editPart }) {
                             <label className="block text-sm font-medium text-gray-700 mb-1.5">
                                 File AI Model <span className="text-gray-400 font-normal">(.pt)</span>
                             </label>
-                            <input type="text" value={data.ai_model_file} onChange={(e) => setData('ai_model_file', e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                                placeholder="Contoh: best.pt atau yolo26n.pt" />
+                            {editPart && editPart.ai_model_file && (
+                                <p className="text-xs text-gray-500 mb-2">Model saat ini: <strong>{editPart.ai_model_file}</strong>. Biarkan kosong jika tidak ingin mengubah.</p>
+                            )}
+                            <input type="file" onChange={(e) => setData('ai_model_file', e.target.files[0])}
+                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                                accept=".pt" />
+                             {errors.ai_model_file && <p className="text-red-500 text-xs mt-1">{errors.ai_model_file}</p>}
                         </div>
                         <div className="flex gap-3 pt-2">
                             <button type="button" onClick={onClose} className="flex-1 py-3 rounded-xl border-2 border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer bg-white">Batal</button>
@@ -275,8 +280,8 @@ export default function Products() {
             </div>
 
             {/* Modals */}
-            <ModelModal isOpen={modelModalOpen} onClose={() => setModelModalOpen(false)} />
-            <PartModal isOpen={partModal.open} onClose={() => setPartModal({ open: false, modelId: null, editPart: null })} modelId={partModal.modelId} editPart={partModal.editPart} />
+            {modelModalOpen && <ModelModal isOpen={modelModalOpen} onClose={() => setModelModalOpen(false)} />}
+            {partModal.open && <PartModal isOpen={partModal.open} onClose={() => setPartModal({ open: false, modelId: null, editPart: null })} modelId={partModal.modelId} editPart={partModal.editPart} />}
         </AdminLayout>
     );
 }

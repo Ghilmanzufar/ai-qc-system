@@ -80,3 +80,9 @@ Route::middleware(['auth', 'role:member,admin'])->prefix('member')->name('operat
     Route::get('/announcements/active', [AnnouncementController::class, 'active'])->name('announcements.active');
     Route::post('/announcements/{id}/read', [AnnouncementController::class, 'markRead'])->name('announcements.read');
 });
+
+// ==========================================
+// DEMO ROUTES (Temporary)
+// ==========================================
+Route::get('/demo', [\App\Http\Controllers\DemoController::class, 'index'])->name('demo.index');
+Route::post('/demo/analyze', [\App\Http\Controllers\DemoController::class, 'analyze'])->name('demo.analyze');

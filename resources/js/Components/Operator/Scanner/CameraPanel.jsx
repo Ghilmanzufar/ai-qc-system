@@ -1,8 +1,7 @@
 import React from 'react';
-import { Camera, Send, CheckCircle2, XCircle, RefreshCcw, Video } from 'lucide-react';
+import { Camera, Send, CheckCircle2, XCircle, RefreshCcw, Video, Upload } from 'lucide-react';
 
 export default function CameraPanel({
-    side, 
     title, 
     stream, 
     videoRef, 
@@ -12,14 +11,14 @@ export default function CameraPanel({
     captured, 
     result, 
     isAnalyzing, 
-    isFrontCompleted,
     part,
     onCapture,
     onRetake,
-    onSubmit
+    onSubmit,
+    onUpload
 }) {
     return (
-        <div className="flex flex-col min-h-[500px]">
+        <div className="flex flex-col h-full min-h-[70vh]">
             <div className="bg-white rounded-t-[24px] px-6 py-4 border border-slate-200/60 border-b-0 flex items-center justify-between shadow-sm z-10 relative">
                 <div className="flex items-center gap-3">
                     <div className={`w-2.5 h-2.5 rounded-full ${stream ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-red-500'}`}></div>
@@ -50,21 +49,13 @@ export default function CameraPanel({
                     className={`w-full h-full object-cover transition-opacity ${captured ? 'opacity-0' : 'opacity-95'}`}
                 />
 
-                {/* Captured Image Preview */}
+                {/* Captured Image Preview OR Annotated Image */}
                 {captured && (
-                    <img src={captured} alt="Captured" className="absolute inset-0 w-full h-full object-contain bg-slate-900 z-10" />
-                )}
-
-                {/* Standby UI (Back Camera only) */}
-                {side === 'back' && !isFrontCompleted && (
-                    <div className="absolute inset-0 z-10 bg-slate-900 flex flex-col items-center justify-center">
-                        <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mb-4 border border-slate-700">
-                            <Camera className="w-10 h-10 text-slate-500" />
-                        </div>
-                        <p className="text-slate-400 font-bold tracking-widest text-sm text-center px-4">
-                            MENUNGGU ANALISIS DEPAN SELESAI
-                        </p>
-                    </div>
+                    <img 
+                        src={result?.annotated_image || captured} 
+                        alt={result ? "Annotated" : "Captured"} 
+                        className="absolute inset-0 w-full h-full object-contain bg-slate-900 z-10" 
+                    />
                 )}
 
                 {/* Reticle / Crosshair (only when live) */}
@@ -94,77 +85,111 @@ export default function CameraPanel({
                     </div>
                 )}
 
-                {/* Result Overlay */}
+                {/* Result Status Badge (Top Right) */}
                 {result && !isAnalyzing && (
-                    <div className={`absolute inset-0 z-40 flex flex-col items-center justify-center p-6 text-center transition-all duration-300
-                        ${result.status === 'OK' ? 'bg-emerald-500/80 backdrop-blur-sm' : 'bg-red-600/85 backdrop-blur-md'}
-                    `}>
-                        <div className="scale-up-animation flex flex-col items-center">
-                            {result.status === 'OK' ? (
+                    <>
+                        <div className={`absolute top-4 right-4 z-40 px-6 py-3 rounded-2xl font-black text-xl shadow-2xl flex items-center gap-3
+                            ${result.status === 'OK' || result.status === 'PASS' ? 'bg-emerald-500 text-white' : 'bg-red-600 text-white'}
+                        `}>
+                            {result.status === 'OK' || result.status === 'PASS' ? (
                                 <>
-                                    <CheckCircle2 className="w-28 h-28 text-white mb-4 drop-shadow-xl" />
-                                    <h2 className="text-6xl font-black text-white drop-shadow-lg">PASS</h2>
+                                    <CheckCircle2 className="w-7 h-7" />
+                                    PASS
                                 </>
                             ) : (
                                 <>
-                                    <XCircle className="w-28 h-28 text-white mb-4 drop-shadow-xl" />
-                                    <h2 className="text-6xl font-black text-white drop-shadow-lg">REJECT</h2>
-                                    <div className="mt-6 px-8 py-3 bg-black/60 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl mb-6">
-                                        <p className="text-white text-2xl font-bold uppercase tracking-wider">{result.defect_type || 'CACAT TERDETEKSI'}</p>
-                                    </div>
-                                    {side === 'front' && (
-                                        <div className="flex gap-4 w-full max-w-sm">
-                                            <button 
-                                                onClick={() => onRetake(side)}
-                                                className="flex-1 py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors border border-slate-600 shadow-xl pointer-events-auto"
-                                            >
-                                                Retake Ulang
-                                            </button>
-                                            <button 
-                                                onClick={() => {
-                                                    // In component version, this is handled by parent, but we can pass a special event or handle it here
-                                                    // For clean code, it's better to let parent handle the 'Lanjutkan' click
-                                                    onSubmit(side, true); // true = force continue
-                                                }}
-                                                className="flex-1 py-3 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-400 transition-colors shadow-xl pointer-events-auto"
-                                            >
-                                                Lanjutkan
-                                            </button>
-                                        </div>
-                                    )}
+                                    <XCircle className="w-7 h-7" />
+                                    REJECT
                                 </>
                             )}
                         </div>
-                    </div>
-                )}
 
-                {/* Tombol Aksi di Bawah */}
-                {!result && !isAnalyzing && (
-                    <div className="absolute bottom-8 left-8 right-8 flex justify-center z-20">
-                        {!captured ? (
-                            <button 
-                                onClick={() => onCapture(side)}
-                                disabled={!part || !stream}
-                                className={`
-                                    w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-2xl group/btn
-                                    ${(!part || !stream) 
-                                        ? 'bg-slate-800/80 text-slate-400 cursor-not-allowed border-4 border-slate-600/50 backdrop-blur-sm' 
-                                        : 'bg-emerald-500 text-white hover:bg-emerald-400 active:scale-95 border-4 border-emerald-300 ring-4 ring-emerald-500/30'
-                                    }
-                                `}
-                            >
-                                <Camera className="w-8 h-8" />
-                            </button>
-                        ) : (
+                        {/* Defect Type Info (Bottom Right) */}
+                        {result.defect_type && (
+                            <div className="absolute bottom-4 right-4 z-40 px-5 py-3 bg-black/70 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl">
+                                <p className="text-white text-base font-bold uppercase">{result.defect_type}</p>
+                            </div>
+                        )}
+
+                        {/* Action Buttons (Bottom Center) */}
+                        <div className="absolute bottom-8 left-8 right-8 flex justify-center items-center gap-6 z-40">
                             <div className="flex w-full gap-4">
                                 <button 
-                                    onClick={() => onRetake(side)}
+                                    onClick={() => onRetake()}
                                     className="flex-1 py-4 bg-slate-800/90 backdrop-blur-md text-white text-lg font-bold rounded-2xl border-2 border-slate-600 hover:bg-slate-700 transition-colors shadow-xl flex items-center justify-center gap-2"
                                 >
                                     <RefreshCcw className="w-5 h-5" /> Retake
                                 </button>
                                 <button 
-                                    onClick={() => onSubmit(side)}
+                                    onClick={() => {
+                                        onSubmit(null, true); // true = force continue
+                                    }}
+                                    className="flex-[2] py-4 flex items-center justify-center gap-3 bg-emerald-500 text-white text-xl font-black rounded-2xl shadow-2xl shadow-emerald-500/40 hover:bg-emerald-400 transition-transform active:scale-95 border-2 border-emerald-400"
+                                >
+                                    <Send className="w-6 h-6" /> LANJUTKAN
+                                </button>
+                            </div>
+                        </div>
+                    </>
+                )}
+
+                {/* Tombol Aksi di Bawah */}
+                {!result && !isAnalyzing && (
+                    <div className="absolute bottom-8 left-8 right-8 flex justify-center items-center gap-6 z-20">
+                        {!captured ? (
+                            <>
+                                <button 
+                                    onClick={() => onCapture()}
+                                    disabled={!part || !stream}
+                                    className={`
+                                        w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-2xl group/btn
+                                        ${(!part || !stream) 
+                                            ? 'bg-slate-800/80 text-slate-400 cursor-not-allowed border-4 border-slate-600/50 backdrop-blur-sm' 
+                                            : 'bg-emerald-500 text-white hover:bg-emerald-400 active:scale-95 border-4 border-emerald-300 ring-4 ring-emerald-500/30'
+                                        }
+                                    `}
+                                >
+                                    <Camera className="w-8 h-8" />
+                                </button>
+                                
+                                <label className={`
+                                    w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-2xl cursor-pointer
+                                    ${!part
+                                        ? 'bg-slate-800/80 text-slate-400 cursor-not-allowed border-4 border-slate-600/50 backdrop-blur-sm'
+                                        : 'bg-blue-500 text-white hover:bg-blue-400 active:scale-95 border-4 border-blue-300 ring-4 ring-blue-500/30'
+                                    }
+                                `}>
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        className="hidden" 
+                                        disabled={!part}
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onloadend = () => {
+                                                    // Pass dataUrl to parent somehow, but we don't have onUpload prop yet.
+                                                    // Let's add onUpload to props.
+                                                    if (onUpload) onUpload(reader.result);
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }} 
+                                    />
+                                    <Upload className="w-8 h-8" />
+                                </label>
+                            </>
+                        ) : (
+                            <div className="flex w-full gap-4">
+                                <button 
+                                    onClick={() => onRetake()}
+                                    className="flex-1 py-4 bg-slate-800/90 backdrop-blur-md text-white text-lg font-bold rounded-2xl border-2 border-slate-600 hover:bg-slate-700 transition-colors shadow-xl flex items-center justify-center gap-2"
+                                >
+                                    <RefreshCcw className="w-5 h-5" /> Retake
+                                </button>
+                                <button 
+                                    onClick={() => onSubmit()}
                                     className="flex-[2] py-4 flex items-center justify-center gap-3 bg-emerald-500 text-white text-xl font-black rounded-2xl shadow-2xl shadow-emerald-500/40 hover:bg-emerald-400 transition-transform active:scale-95 border-2 border-emerald-400"
                                 >
                                     <Send className="w-6 h-6" /> KIRIM
