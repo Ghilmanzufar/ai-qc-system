@@ -62,8 +62,8 @@ export default function AdminSidebar({ isOpen, onClose, onLogout, user }) {
                 {/* Logo Area */}
                 <div className="h-16 flex items-center justify-between px-6 bg-slate-950/50 border-b border-slate-800">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
-                            PEC
+                        <div className="w-max px-3 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
+                            Packing
                         </div>
                         <span className="text-lg font-black text-white tracking-tight">Camera Inspection</span>
                     </div>

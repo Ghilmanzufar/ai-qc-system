@@ -56,7 +56,7 @@ const menuConfig = {
         { name: 'Live Monitoring', href: '/supervisor/dashboard', routeName: 'supervisor.dashboard', icon: Icons.Chart },
     ],
     operator: [
-        { name: 'Scanner PEC', href: '/operator/scanner', routeName: 'operator.scanner', icon: Icons.Scanner },
+        { name: 'Scanner Packing', href: '/operator/scanner', routeName: 'operator.scanner', icon: Icons.Scanner },
     ],
 };
 
@@ -99,12 +99,12 @@ export default function AuthenticatedLayout({ children }) {
                 {/* Logo */}
                 <div className="flex items-center justify-between px-6 h-[72px] border-b border-gray-100">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-200">
-                            PEC
+                        <div className="w-max px-3 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-200">
+                            Packing
                         </div>
                         <div>
-                            <h1 className="text-[15px] font-bold text-gray-900 leading-tight">AI PEC System</h1>
-                            <p className="text-[11px] text-gray-400 leading-tight">PEC</p>
+                            <h1 className="text-[15px] font-bold text-gray-900 leading-tight">AI Packing System</h1>
+                            <p className="text-[11px] text-gray-400 leading-tight">Packing</p>
                         </div>
                     </div>
                     <button
@@ -183,10 +183,10 @@ export default function AuthenticatedLayout({ children }) {
                             <Icons.Menu />
                         </button>
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
-                                PEC
-                            </div>
-                            <span className="text-[14px] font-bold text-gray-900">AI PEC System</span>
+                            <div className="w-max px-2 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-md">
+                            Packing
+                        </div>
+                            <span className="text-[14px] font-bold text-gray-900">AI Packing System</span>
                         </div>
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
                             {user?.name?.charAt(0)?.toUpperCase() || 'U'}

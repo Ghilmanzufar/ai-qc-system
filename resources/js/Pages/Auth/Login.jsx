@@ -35,8 +35,8 @@ export default function Login() {
                     </div>
 
                     <div className="relative z-10 flex flex-col justify-center px-16 xl:px-24">
-                        <div className="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-8 shadow-2xl">
-                            <span className="text-white font-bold text-2xl">PEC</span>
+                        <div className="w-max px-6 h-16 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-8 shadow-2xl">
+                            <span className="text-white font-bold text-2xl">Packing</span>
                         </div>
                         <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-4 shadow-sm">
                             AI Inspection<br />Camera
@@ -52,12 +52,12 @@ export default function Login() {
                     <div className="w-full max-w-[400px]">
                         {/* Mobile Logo */}
                         <div className="lg:hidden flex items-center gap-3 mb-10">
-                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-amber-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-emerald-200">
-                                PEC
+                            <div className="w-max px-4 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-amber-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-emerald-200">
+                                Packing
                             </div>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">AI PEC System</h1>
-                                <p className="text-xs text-gray-400">PEC</p>
+                                <h1 className="text-xl font-bold text-gray-900">AI Packing System</h1>
+                                <p className="text-xs text-gray-400">Packing</p>
                             </div>
                         </div>
 
