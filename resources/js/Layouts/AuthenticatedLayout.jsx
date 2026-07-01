@@ -99,7 +99,7 @@ export default function AuthenticatedLayout({ children }) {
                 {/* Logo */}
                 <div className="flex items-center justify-between px-6 h-[72px] border-b border-gray-100">
                     <div className="flex items-center gap-3">
-                        <div className="w-max px-3 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-200">
+                        <div className="w-max px-3 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-orange-200">
                             Packing
                         </div>
                         <div>
@@ -129,18 +129,18 @@ export default function AuthenticatedLayout({ children }) {
                                         flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium
                                         transition-all duration-200 no-underline
                                         ${isActive
-                                            ? 'bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 shadow-sm'
+                                            ? 'bg-gradient-to-r from-orange-50 to-purple-50 text-orange-700 shadow-sm'
                                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                         }
                                     `}
                                     onClick={() => setSidebarOpen(false)}
                                 >
-                                    <span className={isActive ? 'text-indigo-600' : 'text-gray-400'}>
+                                    <span className={isActive ? 'text-orange-600' : 'text-gray-400'}>
                                         <item.icon />
                                     </span>
                                     {item.name}
                                     {isActive && (
-                                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-orange-500" />
                                     )}
                                 </Link>
                             );
@@ -151,7 +151,7 @@ export default function AuthenticatedLayout({ children }) {
                 {/* User Info & Logout */}
                 <div className="border-t border-gray-100 p-4">
                     <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
                             {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -183,12 +183,12 @@ export default function AuthenticatedLayout({ children }) {
                             <Icons.Menu />
                         </button>
                         <div className="flex items-center gap-2">
-                            <div className="w-max px-2 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-md">
+                            <div className="w-max px-2 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-md">
                             Packing
                         </div>
                             <span className="text-[14px] font-bold text-gray-900">AI Packing System</span>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
                             {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                         </div>
                     </div>

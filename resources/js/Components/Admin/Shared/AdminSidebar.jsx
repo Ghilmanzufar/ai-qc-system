@@ -62,7 +62,7 @@ export default function AdminSidebar({ isOpen, onClose, onLogout, user }) {
                 {/* Logo Area */}
                 <div className="h-16 flex items-center justify-between px-6 bg-slate-950/50 border-b border-slate-800">
                     <div className="flex items-center gap-3">
-                        <div className="w-max px-3 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
+                        <div className="w-max px-3 h-8 bg-green-500 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-green-500/20">
                             Packing
                         </div>
                         <span className="text-lg font-black text-white tracking-tight">Camera Inspection</span>
@@ -80,7 +80,7 @@ export default function AdminSidebar({ isOpen, onClose, onLogout, user }) {
                             href={item.href}
                             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${
                                 item.active 
-                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
+                                ? 'bg-green-600 text-white shadow-lg shadow-green-500/20' 
                                 : 'hover:bg-slate-800 hover:text-white'
                             }`}
                         >
@@ -93,12 +93,12 @@ export default function AdminSidebar({ isOpen, onClose, onLogout, user }) {
                 {/* Footer / User Area */}
                 <div className="p-4 border-t border-slate-800 bg-slate-950/50">
                     <div className="flex items-center gap-3 mb-4 px-2">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-md shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-orange-600 text-white flex items-center justify-center font-bold shadow-md shrink-0">
                             {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
                         </div>
                         <div className="flex flex-col overflow-hidden">
                             <span className="text-sm font-bold text-white truncate">{user?.name || 'Administrator'}</span>
-                            <span className="text-xs font-semibold text-blue-400 truncate uppercase tracking-wider">{user?.role || 'Admin'}</span>
+                            <span className="text-xs font-semibold text-green-400 truncate uppercase tracking-wider">{user?.role || 'Admin'}</span>
                         </div>
                     </div>
 

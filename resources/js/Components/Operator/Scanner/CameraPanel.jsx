@@ -1,5 +1,47 @@
-import React from 'react';
-import { Camera, Send, CheckCircle2, XCircle, RefreshCcw, Video, Upload } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Camera, Send, CheckCircle2, XCircle, RefreshCcw, Video, Upload, ChevronRight } from 'lucide-react';
+
+const WarpingProcessTracker = () => {
+    const steps = [
+        "Memisahkan Objek (Grayscale & Threshold)...",
+        "Mengekstrak Masking (Contour Detection)...",
+        "Mendeteksi Titik Fitur (ORB)...",
+        "Menghitung Rotasi & Skala (Homography)...",
+        "Meluruskan Gambar (Warp Perspective)..."
+    ];
+    const [currentStep, setCurrentStep] = useState(0);
+
+    useEffect(() => {
+        // Total delay di useScannerCameras adalah 1500ms
+        // Kita punya 5 step, jadi tiap step sekitar 250-300ms
+        const interval = setInterval(() => {
+            setCurrentStep(prev => (prev < steps.length - 1 ? prev + 1 : prev));
+        }, 280);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="w-full max-w-sm mt-4 px-6 py-4 bg-slate-900/80 rounded-2xl border border-slate-700/80 shadow-2xl backdrop-blur-xl">
+            <h3 className="text-emerald-400 font-black mb-4 text-xs tracking-[0.2em] uppercase text-center">
+                Visualisasi Proses OpenCV
+            </h3>
+            <div className="space-y-2.5">
+                {steps.map((step, idx) => (
+                    <div key={idx} className={`flex items-center gap-3 text-sm font-semibold transition-all duration-300 ${idx < currentStep ? 'text-emerald-400' : idx === currentStep ? 'text-white translate-x-1' : 'text-slate-500/50'}`}>
+                        {idx < currentStep ? (
+                            <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        ) : idx === currentStep ? (
+                            <RefreshCcw className="w-4 h-4 shrink-0 animate-spin text-emerald-400" />
+                        ) : (
+                            <div className="w-4 h-4 shrink-0 rounded-full border-2 border-slate-600/50"></div>
+                        )}
+                        <span className={idx === currentStep ? 'animate-pulse' : ''}>{step}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 export default function CameraPanel({
     title, 
@@ -11,6 +53,7 @@ export default function CameraPanel({
     captured, 
     result, 
     isAnalyzing, 
+    processStep,
     part,
     onCapture,
     onRetake,
@@ -73,15 +116,22 @@ export default function CameraPanel({
 
                 {/* Loading State */}
                 {isAnalyzing && (
-                    <div className="absolute inset-0 z-30 bg-slate-900/80 backdrop-blur-md flex flex-col items-center justify-center">
-                        <div className="relative w-20 h-20 mb-6">
+                    <div className="absolute inset-0 z-30 bg-slate-900/90 backdrop-blur-md flex flex-col items-center justify-center p-6">
+                        <div className="relative w-16 h-16 mb-4 shrink-0">
                             <div className="absolute inset-0 border-4 border-emerald-500/20 rounded-full"></div>
                             <div className="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin"></div>
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
+                                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></div>
                             </div>
                         </div>
-                        <p className="text-emerald-400 font-bold tracking-widest animate-pulse">ANALISIS SISI INI...</p>
+                        
+                        {processStep === 'WARPING' ? (
+                            <WarpingProcessTracker />
+                        ) : (
+                            <div className="mt-4 px-6 py-4 bg-slate-800/60 rounded-xl border border-slate-700/50">
+                                <p className="text-emerald-400 font-bold tracking-widest animate-pulse text-center">ANALISIS AI (YOLO)...</p>
+                            </div>
+                        )}
                     </div>
                 )}
 

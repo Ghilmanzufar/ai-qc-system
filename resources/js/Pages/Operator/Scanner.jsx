@@ -44,7 +44,7 @@ export default function Scanner() {
 
     const {
         devices,
-        videoRef, canvasRef, cameraId, setCameraId, stream, captured, setCaptured, result, setResult, isAnalyzing,
+        videoRef, canvasRef, cameraId, setCameraId, stream, captured, setCaptured, result, setResult, isAnalyzing, processStep,
         capturePhoto, retakePhoto, submitPhoto
     } = useScannerCameras(part, setStats, setAiOffline, isConfirmOpen);
 
@@ -177,6 +177,7 @@ export default function Scanner() {
                             captured={captured}
                             result={result}
                             isAnalyzing={isAnalyzing}
+                            processStep={processStep}
                             part={part}
                             onCapture={capturePhoto}
                             onRetake={retakePhoto}

@@ -46,7 +46,7 @@ export default function AnnouncementsIndex({ announcements, auth }) {
                 </div>
                 <button 
                     onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/30"
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-green-500/30"
                 >
                     <Plus className="w-5 h-5" />
                     Buat Pengumuman Baru
@@ -68,7 +68,7 @@ export default function AnnouncementsIndex({ announcements, auth }) {
                             placeholder="Cari pesan..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 text-sm"
                         />
                     </div>
                 </div>
@@ -105,7 +105,7 @@ export default function AnnouncementsIndex({ announcements, auth }) {
                                                     <AlertTriangle className="w-3 h-3" /> Alert
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-700 w-max">
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-green-100 text-green-700 w-max">
                                                     <Megaphone className="w-3 h-3" /> Broadcast
                                                 </span>
                                             )}
@@ -122,8 +122,8 @@ export default function AnnouncementsIndex({ announcements, auth }) {
                                     </td>
                                     <td className="p-4 align-top">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100">
-                                                <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                                            <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center border border-green-100">
+                                                <CheckCircle2 className="w-4 h-4 text-green-500" />
                                             </div>
                                             <div>
                                                 <p className="text-sm font-black text-slate-800">{ann.reads_count}</p>
@@ -183,7 +183,7 @@ export default function AnnouncementsIndex({ announcements, auth }) {
                                             onClick={() => setData('type', 'broadcast')}
                                             className={`flex-1 py-2 px-3 rounded-xl border text-sm font-bold flex items-center justify-center gap-2 transition-all ${
                                                 data.type === 'broadcast' 
-                                                ? 'bg-blue-50 border-blue-200 text-blue-700' 
+                                                ? 'bg-green-50 border-green-200 text-green-700' 
                                                 : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
                                             }`}
                                         >
@@ -207,7 +207,7 @@ export default function AnnouncementsIndex({ announcements, auth }) {
                                 <div className="space-y-2">
                                     <label className="text-sm font-bold text-slate-700">Target Role</label>
                                     <select 
-                                        className="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                        className="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-green-500 outline-none transition-all"
                                         value={data.target_role}
                                         onChange={e => setData('target_role', e.target.value)}
                                     >
@@ -225,7 +225,7 @@ export default function AnnouncementsIndex({ announcements, auth }) {
                                     type="text" 
                                     value={data.title}
                                     onChange={e => setData('title', e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-green-500 outline-none transition-all"
                                     placeholder="Contoh: Info Shift Siang"
                                     required
                                 />
@@ -237,7 +237,7 @@ export default function AnnouncementsIndex({ announcements, auth }) {
                                 <textarea 
                                     value={data.body}
                                     onChange={e => setData('body', e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all h-32 resize-none custom-scrollbar"
+                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-green-500 outline-none transition-all h-32 resize-none custom-scrollbar"
                                     placeholder="Tulis instruksi atau informasi detail di sini..."
                                     required
                                 ></textarea>
@@ -255,7 +255,7 @@ export default function AnnouncementsIndex({ announcements, auth }) {
                                 <button 
                                     type="submit"
                                     disabled={processing}
-                                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/30 disabled:opacity-50"
+                                    className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-green-500/30 disabled:opacity-50"
                                 >
                                     {processing ? 'Menyimpan...' : 'Siarkan Sekarang'}
                                 </button>

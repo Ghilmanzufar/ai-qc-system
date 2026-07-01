@@ -25,13 +25,13 @@ function ModelModal({ isOpen, onClose }) {
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1.5">Nama Model</label>
                             <input type="text" value={data.name} onChange={(e) => setData('name', e.target.value)}
-                                className={`w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 ${errors.name ? 'border-red-300' : 'border-gray-200'}`}
+                                className={`w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 ${errors.name ? 'border-red-300' : 'border-gray-200'}`}
                                 placeholder="Contoh: Kipas Angin Elektrik" autoFocus />
                             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                         </div>
                         <div className="flex gap-3 pt-2">
                             <button type="button" onClick={onClose} className="flex-1 py-3 rounded-xl border-2 border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer bg-white">Batal</button>
-                            <button type="submit" disabled={processing} className={`flex-1 py-3 rounded-xl border-0 text-sm font-semibold text-white transition-all cursor-pointer shadow-lg shadow-indigo-500/25 ${processing ? 'bg-gray-400' : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-xl'}`}>
+                            <button type="submit" disabled={processing} className={`flex-1 py-3 rounded-xl border-0 text-sm font-semibold text-white transition-all cursor-pointer shadow-lg shadow-orange-500/25 ${processing ? 'bg-gray-400' : 'bg-gradient-to-r from-orange-600 to-purple-600 hover:shadow-xl'}`}>
                                 {processing ? 'Menyimpan...' : 'Tambah Model'}
                             </button>
                         </div>
@@ -48,8 +48,22 @@ function PartModal({ isOpen, onClose, modelId, editPart }) {
         part_no: editPart?.part_no || '',
         part_name: editPart?.part_name || '',
         ai_model_file: null, // ubah menjadi null karena file
+        master_image_file: null,
         _method: editPart ? 'put' : 'post', // trik laravel untuk update form data
     });
+    
+    const [previewUrl, setPreviewUrl] = useState(editPart?.master_image_url || null);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        setData('master_image_file', file);
+        if (file) {
+            setPreviewUrl(URL.createObjectURL(file));
+        } else {
+            setPreviewUrl(editPart?.master_image_url || null);
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (editPart) {
@@ -74,14 +88,14 @@ function PartModal({ isOpen, onClose, modelId, editPart }) {
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1.5">Part No.</label>
                             <input type="text" value={data.part_no} onChange={(e) => setData('part_no', e.target.value)}
-                                className={`w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 ${errors.part_no ? 'border-red-300' : 'border-gray-200'}`}
+                                className={`w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 ${errors.part_no ? 'border-red-300' : 'border-gray-200'}`}
                                 placeholder="Contoh: KP-001" autoFocus />
                             {errors.part_no && <p className="text-red-500 text-xs mt-1">{errors.part_no}</p>}
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1.5">Nama Part</label>
                             <input type="text" value={data.part_name} onChange={(e) => setData('part_name', e.target.value)}
-                                className={`w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 ${errors.part_name ? 'border-red-300' : 'border-gray-200'}`}
+                                className={`w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 ${errors.part_name ? 'border-red-300' : 'border-gray-200'}`}
                                 placeholder="Contoh: Baling-Baling" />
                             {errors.part_name && <p className="text-red-500 text-xs mt-1">{errors.part_name}</p>}
                         </div>
@@ -93,13 +107,32 @@ function PartModal({ isOpen, onClose, modelId, editPart }) {
                                 <p className="text-xs text-gray-500 mb-2">Model saat ini: <strong>{editPart.ai_model_file}</strong>. Biarkan kosong jika tidak ingin mengubah.</p>
                             )}
                             <input type="file" onChange={(e) => setData('ai_model_file', e.target.files[0])}
-                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer"
                                 accept=".pt" />
                              {errors.ai_model_file && <p className="text-red-500 text-xs mt-1">{errors.ai_model_file}</p>}
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                File Gambar Master <span className="text-gray-400 font-normal">(.jpg, .png)</span>
+                            </label>
+                            
+                            {previewUrl && (
+                                <div className="mb-3 rounded-xl overflow-hidden border-2 border-gray-100 bg-gray-50 flex justify-center items-center h-32">
+                                    <img src={previewUrl} alt="Preview" className="h-full w-full object-contain" />
+                                </div>
+                            )}
+
+                            {editPart && editPart.master_image_file && !data.master_image_file && (
+                                <p className="text-xs text-gray-500 mb-2">Master saat ini: <a href={editPart.master_image_url} target="_blank" rel="noreferrer" className="text-orange-600 hover:underline">{editPart.master_image_file}</a>. Biarkan kosong jika tidak mengubah.</p>
+                            )}
+                            <input type="file" onChange={handleFileChange}
+                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm outline-none transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer"
+                                accept=".jpg,.jpeg,.png" />
+                             {errors.master_image_file && <p className="text-red-500 text-xs mt-1">{errors.master_image_file}</p>}
+                        </div>
                         <div className="flex gap-3 pt-2">
                             <button type="button" onClick={onClose} className="flex-1 py-3 rounded-xl border-2 border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer bg-white">Batal</button>
-                            <button type="submit" disabled={processing} className={`flex-1 py-3 rounded-xl border-0 text-sm font-semibold text-white transition-all cursor-pointer shadow-lg shadow-indigo-500/25 ${processing ? 'bg-gray-400' : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-xl'}`}>
+                            <button type="submit" disabled={processing} className={`flex-1 py-3 rounded-xl border-0 text-sm font-semibold text-white transition-all cursor-pointer shadow-lg shadow-orange-500/25 ${processing ? 'bg-gray-400' : 'bg-gradient-to-r from-orange-600 to-purple-600 hover:shadow-xl'}`}>
                                 {processing ? 'Menyimpan...' : editPart ? 'Simpan Perubahan' : 'Tambah Part'}
                             </button>
                         </div>
@@ -144,8 +177,8 @@ export default function Products() {
                 </div>
                 <button onClick={() => setModelModalOpen(true)}
                     className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl
-                        bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-semibold
-                        shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30
+                        bg-gradient-to-r from-orange-600 to-purple-600 text-white text-sm font-semibold
+                        shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30
                         transition-all duration-200 cursor-pointer border-0 active:scale-[0.98]">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Tambah Model
@@ -159,7 +192,7 @@ export default function Products() {
                         {/* Model Header */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 sm:px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-orange-600
                                     flex items-center justify-center text-white shadow-md shrink-0">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
                                 </div>
@@ -171,7 +204,7 @@ export default function Products() {
                             <div className="flex items-center gap-2 sm:gap-3">
                                 <button onClick={() => setPartModal({ open: true, modelId: model.id, editPart: null })}
                                     className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold
-                                        text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors cursor-pointer border-0">
+                                        text-orange-600 bg-orange-50 hover:bg-orange-100 transition-colors cursor-pointer border-0">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                                     Tambah Part
                                 </button>
@@ -192,6 +225,7 @@ export default function Products() {
                                             <tr className="border-b border-gray-100">
                                                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Part No.</th>
                                                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Nama Part</th>
+                                                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Master Image</th>
                                                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">AI Model</th>
                                                 <th className="text-right px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Aksi</th>
                                             </tr>
@@ -203,6 +237,16 @@ export default function Products() {
                                                         <span className="inline-flex px-2.5 py-1 rounded-lg bg-gray-100 text-xs font-mono font-semibold text-gray-700">{part.part_no}</span>
                                                     </td>
                                                     <td className="px-6 py-3.5 text-sm text-gray-700 font-medium">{part.part_name}</td>
+                                                    <td className="px-6 py-3.5">
+                                                        {part.master_image_file ? (
+                                                            <a href={part.master_image_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-50 text-xs font-mono font-semibold text-orange-700 border border-orange-200 hover:bg-orange-100 transition-colors">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                                                                Tersedia
+                                                            </a>
+                                                        ) : (
+                                                            <span className="text-xs text-gray-300 italic">Belum diset</span>
+                                                        )}
+                                                    </td>
                                                     <td className="px-6 py-3.5">
                                                         {part.ai_model_file ? (
                                                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-xs font-mono font-semibold text-emerald-700 border border-emerald-200">
@@ -216,7 +260,7 @@ export default function Products() {
                                                     <td className="px-6 py-3.5">
                                                         <div className="flex items-center justify-end gap-2">
                                                             <button onClick={() => setPartModal({ open: true, modelId: model.id, editPart: part })}
-                                                                className="px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors cursor-pointer border-0">Edit</button>
+                                                                className="px-3 py-1.5 rounded-lg text-xs font-medium text-orange-600 bg-orange-50 hover:bg-orange-100 transition-colors cursor-pointer border-0">Edit</button>
                                                             <button onClick={() => handleDeletePart(part)}
                                                                 className="px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer border-0">Hapus</button>
                                                         </div>
@@ -237,16 +281,23 @@ export default function Products() {
                                                         <span className="inline-flex px-2 py-0.5 rounded-md bg-gray-100 text-xs font-mono font-semibold text-gray-600">{part.part_no}</span>
                                                     </div>
                                                     <p className="text-sm font-medium text-gray-900">{part.part_name}</p>
-                                                    {part.ai_model_file && (
-                                                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-md bg-emerald-50 text-xs font-mono text-emerald-700">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />{part.ai_model_file}
-                                                        </span>
-                                                    )}
+                                                    <div className="flex flex-col gap-1 mt-1.5">
+                                                        {part.master_image_file && (
+                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-orange-50 text-xs font-mono text-orange-700 w-max">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />Master Set
+                                                            </span>
+                                                        )}
+                                                        {part.ai_model_file && (
+                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-xs font-mono text-emerald-700 w-max">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />{part.ai_model_file}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="flex gap-2 mt-3">
                                                 <button onClick={() => setPartModal({ open: true, modelId: model.id, editPart: part })}
-                                                    className="flex-1 py-2 rounded-xl text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors cursor-pointer border-0">Edit</button>
+                                                    className="flex-1 py-2 rounded-xl text-xs font-medium text-orange-600 bg-orange-50 hover:bg-orange-100 transition-colors cursor-pointer border-0">Edit</button>
                                                 <button onClick={() => handleDeletePart(part)}
                                                     className="flex-1 py-2 rounded-xl text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer border-0">Hapus</button>
                                             </div>
@@ -259,7 +310,7 @@ export default function Products() {
                                 <p className="text-sm text-gray-400">Belum ada part untuk model ini.</p>
                                 <button onClick={() => setPartModal({ open: true, modelId: model.id, editPart: null })}
                                     className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold
-                                        text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors cursor-pointer border-0">
+                                        text-orange-600 bg-orange-50 hover:bg-orange-100 transition-colors cursor-pointer border-0">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                                     Tambah Part Pertama
                                 </button>

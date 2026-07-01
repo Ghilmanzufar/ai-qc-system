@@ -129,6 +129,7 @@ class AdminController extends Controller
             'part_no' => 'required|string|max:255',
             'part_name' => 'required|string|max:255',
             'ai_model_file' => 'nullable|file',
+            'master_image_file' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
         $data = $request->only('product_model_id', 'part_no', 'part_name');
@@ -139,6 +140,13 @@ class AdminController extends Controller
             // Simpan ke disk public agar tersimpan di storage/app/public/models
             $file->storeAs('models', $filename, 'public');
             $data['ai_model_file'] = $filename;
+        }
+
+        if ($request->hasFile('master_image_file')) {
+            $file = $request->file('master_image_file');
+            $filename = time() . '_master_' . $file->getClientOriginalName();
+            $file->move(public_path('images/masters'), $filename);
+            $data['master_image_file'] = $filename;
         }
 
         Part::create($data);
@@ -155,6 +163,7 @@ class AdminController extends Controller
             'part_no' => 'required|string|max:255',
             'part_name' => 'required|string|max:255',
             'ai_model_file' => 'nullable|file',
+            'master_image_file' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
         $data = $request->only('part_no', 'part_name');
@@ -176,6 +185,21 @@ class AdminController extends Controller
             }
         }
 
+        if ($request->hasFile('master_image_file')) {
+            $file = $request->file('master_image_file');
+            $filename = time() . '_master_' . $file->getClientOriginalName();
+            $file->move(public_path('images/masters'), $filename);
+            $data['master_image_file'] = $filename;
+
+            // Hapus file lama jika ada
+            if ($part->master_image_file) {
+                $oldPath = public_path('images/masters/' . $part->master_image_file);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+            }
+        }
+
         $part->update($data);
 
         return redirect()->back()->with('success', 'Part berhasil diperbarui.');
@@ -189,6 +213,13 @@ class AdminController extends Controller
         // Hapus file dari storage
         if ($part->ai_model_file) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete('models/' . $part->ai_model_file);
+        }
+        
+        if ($part->master_image_file) {
+            $oldPath = public_path('images/masters/' . $part->master_image_file);
+            if (file_exists($oldPath)) {
+                unlink($oldPath);
+            }
         }
         
         $part->delete();

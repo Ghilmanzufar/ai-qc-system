@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { playBeep } from '@/Utils/audio';
 import useScannerKeyboard from '@/Hooks/Operator/Scanner/useScannerKeyboard';
+import { warpImage } from '@/Utils/opencvUtils';
 
 export default function useScannerCameras(part, setStats, setAiOffline, isConfirmOpen) {
     // Camera Devices
@@ -15,6 +16,7 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
     const [captured, setCaptured] = useState(null);
     const [result, setResult] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [processStep, setProcessStep] = useState(''); // '' | 'WARPING' | 'ANALYZING'
 
     // Handlers to persist selection
     const handleSetCameraId = useCallback((id) => {
@@ -97,13 +99,27 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
         if (!image || !part) return;
 
         setIsAnalyzing(true); 
+        setProcessStep('WARPING');
         setResult(null);
         setAiOffline(false);
 
         try {
+            // Coba warp gambar menggunakan OpenCV
+            // Jika part memiliki master_image_url gunakan itu, jika tidak gunakan default 
+            const masterUrl = part.master_image_url || `/images/masters/${part.part_no}.jpg`;
+            const warpedImage = await warpImage(image, masterUrl);
+            
+            // DEMO: Tampilkan gambar hasil OpenCV ke layar (update state)
+            setCaptured(warpedImage);
+            
+            // Berikan jeda 1.5 detik agar atasan bisa melihat bahwa gambar sudah diluruskan sebelum dikirim ke AI
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            setProcessStep('ANALYZING');
+
             const response = await axios.post('/member/analyze', {
                 part_id: part.id,
-                image: image,
+                image: warpedImage,
                 side: 'front' // Tetap kirim 'front' agar backend tidak bingung
             });
 
@@ -141,6 +157,7 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
             setCaptured(null);
         } finally {
             setIsAnalyzing(false);
+            setProcessStep('');
         }
     }, [part, captured, setStats, setAiOffline]);
 
@@ -162,7 +179,7 @@ export default function useScannerCameras(part, setStats, setAiOffline, isConfir
 
     return {
         devices,
-        videoRef, canvasRef, cameraId, setCameraId: handleSetCameraId, stream, captured, setCaptured, result, setResult, isAnalyzing,
+        videoRef, canvasRef, cameraId, setCameraId: handleSetCameraId, stream, captured, setCaptured, result, setResult, isAnalyzing, processStep,
         capturePhoto, retakePhoto, submitPhoto
     };
 }

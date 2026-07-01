@@ -14,6 +14,7 @@
         @viteReactRefresh
         @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
         @inertiaHead
+        <script src="/js/opencv.js" async></script>
     </head>
     <body class="font-sans antialiased">
         @inertia

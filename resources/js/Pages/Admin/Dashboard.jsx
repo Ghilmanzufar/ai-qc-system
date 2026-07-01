@@ -38,8 +38,8 @@ export default function Dashboard() {
                     value={stats?.todayInspections || 0} 
                     subtitle="Part di-scan hari ini"
                     icon={Camera}
-                    colorClass="text-blue-600"
-                    bgClass="bg-blue-50"
+                    colorClass="text-green-600"
+                    bgClass="bg-green-50"
                 />
                 <StatCard 
                     title="Global Yield Rate" 
