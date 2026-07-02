@@ -164,7 +164,7 @@ export default function DemoIndex() {
                                             className={`flex-1 py-3 px-4 rounded-xl font-semibold text-white transition-all shadow-md flex items-center justify-center gap-2
                                                 ${isAnalyzing || result 
                                                     ? 'bg-gray-300 cursor-not-allowed shadow-none' 
-                                                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 hover:shadow-lg hover:-translate-y-0.5'
+                                                    : 'bg-emerald-600 hover:bg-emerald-700 hover:shadow-lg hover:-translate-y-0.5'
                                                 }`}
                                         >
                                             {isAnalyzing ? (

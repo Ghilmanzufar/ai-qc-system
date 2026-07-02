@@ -153,7 +153,7 @@ export default function Login() {
                                     shadow-lg shadow-emerald-500/25
                                     ${processing
                                         ? 'bg-gray-400 cursor-not-allowed shadow-none'
-                                        : 'bg-gradient-to-r from-emerald-600 to-amber-500 hover:from-emerald-700 hover:to-amber-600 hover:shadow-xl hover:shadow-emerald-500/30 active:scale-[0.98]'
+                                        : 'bg-emerald-600 hover:bg-emerald-700 hover:shadow-xl active:scale-[0.98]'
                                     }
                                 `}
                             >

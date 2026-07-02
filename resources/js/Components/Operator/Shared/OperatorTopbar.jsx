@@ -1,7 +1,29 @@
-import React from 'react';
-import { Menu } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Menu, Maximize, Minimize } from 'lucide-react';
 
 export default function OperatorTopbar({ onMenuClick, title, subtitle, rightContent, centerContent, extraClasses = "" }) {
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.warn(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    };
+
     return (
         <nav className={`sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm px-4 lg:px-6 py-3 flex flex-wrap items-center justify-between gap-4 ${extraClasses}`}>
             <div className="flex items-center gap-4">
@@ -25,11 +47,16 @@ export default function OperatorTopbar({ onMenuClick, title, subtitle, rightCont
                 </div>
             )}
             
-            {rightContent && (
-                <div className="flex items-center gap-4">
-                    {rightContent}
-                </div>
-            )}
+            <div className="flex items-center gap-4">
+                {rightContent}
+                <button 
+                    onClick={toggleFullscreen}
+                    className="flex w-12 h-12 rounded-xl bg-slate-100 hover:bg-slate-200 items-center justify-center transition-colors border border-slate-200 shadow-sm shrink-0"
+                    title={isFullscreen ? "Keluar Fullscreen" : "Layar Penuh (Fullscreen)"}
+                >
+                    {isFullscreen ? <Minimize className="w-5 h-5 text-slate-700" /> : <Maximize className="w-5 h-5 text-slate-700" />}
+                </button>
+            </div>
         </nav>
     );
 }
